@@ -9,7 +9,7 @@ Kb = 1.38e-23; %boltzmann constant [J/K]
 
 Xq0m = 0.026;%Pre-exp. solubility limit 
 Xq0s = 0.01;%Pre-exp. solubility limit 
-Qp = 24800; %energy for the solubility limit [J/mol]
+Qp = 28400; %energy for the solubility limit [J/mol]
 
 P.Xeqm = Xq0m* exp(-Qp/(Rgas*Ta)); % equilibrium solute mole fraction of m in the matrix
 P.Xeqs = Xq0s* exp(-Qp/(Rgas*Ta)); % equilibrium solute mole fraction of m in the matrix
@@ -41,13 +41,14 @@ Ss = P.Xp*log(Xc./P.Xeqs) +(1-P.Xp).*log((1-Xc)./(1-P.Xeqs));
 xdot(1) = (P.Z*P.b0.*(u.^2)./t./Ss.^2).*exp(-P.dG0./Ss.^2).*exp(-(Ss.^2/P.b0/2/P.Z./u.^2));
 xdot(2) = ((u.^2)*P.a^2/x(2)./t).*((Xc - P.Xeqs*exp(P.R0s/P.Xp/x(2)))/(1 - P.Xeqs*exp(P.R0s/P.Xp/x(2)))) + xdot(1)./x(1).*(1.05*P.R0s/Ss-x(2));
 
+
 endfunction
 
 ifunc = @(x,t) func(x,t,P);
 
-x = lsode (ifunc, [1e-16; 0.7], t); % [1e-5 0.7] 
+x = lsode (ifunc, [1e-16; 0.55], t); % [1e-5 0.7] 
 
-AXc= (P.Xc0 - (4/3)*pi*(P.Xp*x(:,1).*x(:,2).^3))./(1 - (4/3)*pi*(P.Xp*x(:,1).*x(:,2).^3));
+AXc= (P.Xc0 - (4/3)*pi*(P.Xp*x(:,1).*x(:,2).^3))./(1 - (4/3)*pi*(x(:,1).*x(:,2).^3));
 ASs = P.Xp*log(AXc./P.Xeqs) +(1-P.Xp)*log((1-AXc)/(1-P.Xeqs));
 AN = P.Z*(P.b0./ASs.^2).*exp(-P.dG0./ASs.^2).*exp(-(ASs.^2/P.b0/2/P.Z)./t');
 ARsS = P.R0s./ASs;
