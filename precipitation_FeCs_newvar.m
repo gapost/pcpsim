@@ -42,7 +42,7 @@ S = P.Xp*log(Xc./P.Xeqs) +(1-P.Xp).*log((1-Xc)./(1-P.Xeqs));
 
 xdot(1) = (P.b0/S.^2) .*exp(-P.dG0/S.^2) .*exp(-(S.^2)./(2*P.b0*u)); 
 
-if (x(1)== 0)
+if (x(1)<1e-15)
   y = 0;
 else
   y = xdot(1)./ x(1);
@@ -53,7 +53,7 @@ endfunction
 
 ifunc = @(x,u) func(x,u,P);
 
-x = lsode (ifunc, [1e-12 0.88], u); % [1e-5 0.7] 
+x = lsode (ifunc, [0 0.88], u); % [1e-5 0.7] 
 
 AXc= (P.Xc0 - P.Xp*P.h*x(:,1).*x(:,2).^3) ./ (1 - P.h*x(:,1).*x(:,2).^3) ;
 AS = P.Xp*log(AXc./P.Xeqs) +(1-P.Xp).*log((1-AXc)./(1-P.Xeqs));
@@ -64,6 +64,7 @@ subplot(3,1,1)
 loglog(u,x(:,2),'.-')
 hold on
 loglog(u,ARsS1,'.-')
+hold off
 xlabel('t (sec)');
 ylabel('R (nm)');
 
@@ -73,6 +74,8 @@ xlabel('t (sec)');
 ylabel('Solute mole fraction');
 
 subplot(3,1,3)
-semilogx(u,x(:,1),'.-')
+loglog(u(2:end),x(2:end,1),'.-')
+ylim([1e-20 1e-10])
 xlabel('t (sec)');
 ylabel('Density ');
+
