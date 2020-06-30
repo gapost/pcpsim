@@ -1,0 +1,125 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+    
+%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+    
+\usepackage[round]{natbib}
+\usepackage{hyperref}
+
+%%%%%%%%%%%%%%%% Code Listing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Matlab,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2                        % sets default tabsize to 2 spaces
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{textcomp}
+\author{
+  A. Theodorou\\
+  \texttt{theoda@ipta.demokritos.gr}
+
+}
+\date{June 2020}
+\title{\texttt{pcpsim} \\ 
+MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
+}
+     
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The model for homogeneous isothermal precipitation is partly based on the model by Langer and Schwartz, modified by Kampmann and Wagner (MLS model). In this model, we treated the nucleation and growth of the precipitation.
+
+
+\section{Thermodynamics of the model}
+
+As a first step we need to define the driving force for precipitation at any given time of the aging process.
+ 
+\begin{equation}
+\Delta g = - \frac{kT}{V_{at}} \cdot S 
+\end{equation}
+
+with
+
+\begin{equation}
+S =  X_p \ln(\frac{X_C}{X_{eq}} ) - (1 - X_p) \ln(\frac{1 - X_C}{X_{eq}}) 
+\end{equation}
+
+where $V_{at}$ is the atomic volume (considered as constant for all species), $S$ is a thermodynamical  function giving the driving force for nucleation (based
+on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the nitrogen mole fraction in the precipitate, and $X_C$ the current solute mole fraction of the matrix.
+
+The nucleation rate as the derivative of the precipitation density $N$ is:
+
+\begin{equation}
+\frac{d N}{d t} = N_0 Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{\tau}{t})
+\end{equation}
+
+where $N_0$ is the number of nucleation sites per unit volume ($\approx  l/vat =2/a^3$ for a bcc structure with lattice parametera), Z is the Zeldovich factor ($\approx$ 1/20), $\tau$ is the incubation time. The other parameters of equation are expressed as follows:
+
+\begin{subequations}
+	\begin{align}
+\beta^* = \frac{4\pi R^{*2} D X_{C0}}{a^4} \\
+R^* = \frac{R_0}{S} \\
+R_0 = \frac{2\gamma V_{at}}{kT} \\
+\Delta G^* = \frac{16}{3}\pi \frac{\gamma}{\delta g} \\
+\tau = \frac{1}{2\beta^* Z} \\
+	\end{align}
+	
+\end{subequations}
+
+where $R^*$ is the nucleation critical radius, R0 is a thermodynamical parameter
+which has the dimension of a length, $\gamma$ is the matrix/precipitate interfacial energy, $D$ is the diffusion coefficient of solute atoms in the matrix, $X_{C0}$ is the initial solute mole fraction.
+
+The precipitate size increase during a time increment dt is then calculated as:
+\begin{equation}
+\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - X_{eq} exp(R_0/(X_pR))}{X_p - X_{eq} exp(R_0/(X_pR))} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
+\end{equation}
+
+The first term corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect) and the second term to the appearance of the new nuclei of
+size $R^*$. The numerical factor $\alpha = 1.05$ results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size. 
+Finally, the coupling between the precipitation density and their mean radius is made through the solute balance:
+
+\begin{equation}
+X_c = \frac{X_{C0}-(4/3)\pi (X_pNR^3)}{1-(4/3)\pi (NR^3)}
+\end{equation}
+
+\bibliographystyle{plainnat}
+\bibliography{library}
+
+\end{document}
+ 
