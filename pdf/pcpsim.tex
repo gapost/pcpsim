@@ -86,10 +86,11 @@ on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equi
 The nucleation rate as the derivative of the precipitation density $N$ is:
 
 \begin{equation}
-\frac{d N}{d t} = N_0 Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{\tau}{t})
+\label{P_density}
+\frac{d N}{d t} = N_0 Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{t_i}{t})
 \end{equation}
 
-where $N_0$ is the number of nucleation sites per unit volume ($\approx  l/vat =2/a^3$ for a bcc structure with lattice parametera), Z is the Zeldovich factor ($\approx$ 1/20), $\tau$ is the incubation time. The other parameters of equation are expressed as follows:
+where $N_0$ is the number of nucleation sites per unit volume ($\approx  l/vat =2/a^3$ for a bcc structure with lattice parametera), Z is the Zeldovich factor ($\approx$ 1/20), $t_i$ is the incubation time. The other parameters of equation are expressed as follows:
 
 \begin{subequations}
 	\begin{align}
@@ -97,9 +98,8 @@ where $N_0$ is the number of nucleation sites per unit volume ($\approx  l/vat =
 R^* = \frac{R_0}{S} \\
 R_0 = \frac{2\gamma V_{at}}{kT} \\
 \Delta G^* = \frac{16}{3}\pi \frac{\gamma}{\delta g} \\
-\tau = \frac{1}{2\beta^* Z} \\
-	\end{align}
-	
+t_i = \frac{1}{2\beta^* Z} \\
+	\end{align}	
 \end{subequations}
 
 where $R^*$ is the nucleation critical radius, R0 is a thermodynamical parameter
@@ -107,6 +107,7 @@ which has the dimension of a length, $\gamma$ is the matrix/precipitate interfac
 
 The precipitate size increase during a time increment dt is then calculated as:
 \begin{equation}
+\label{P_radius}
 \frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - X_{eq} exp(R_0/(X_pR))}{X_p - X_{eq} exp(R_0/(X_pR))} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
 \end{equation}
 
@@ -118,11 +119,45 @@ Finally, the coupling between the precipitation density and their mean radius is
 X_c = \frac{X_{C0}-(4/3)\pi (X_pNR^3)}{1-(4/3)\pi (NR^3)}
 \end{equation}
 
-Now are defined the new dimensionless variables which are more easy to use for programming.
+Now the new dimensionless variables are defined that are easier to use for programming.
 
+\begin{subequations}
+	\begin{align}
+\tau = \frac{D\cdot t}{a^2} \\
+\nu = \frac{N}{N0} \\
+\rho = \frac{R}{R_0}\\
+	\end{align}
+\end{subequations}
 
-\bibliographystyle{plainnat}
-\bibliography{library}
+Thus the equations (\ref{P_density}),(\ref{P_radius}) are replaced by the following dimensionless differential equations:
+
+\begin{equation}
+	\frac{d\nu}{d\tau} = \frac{\beta_0}{S^2} \exp(-\frac{\Delta G_0}{S^2}) exp(-\frac{S^2}{2\beta_0 \tau}) 
+\end{equation}
+
+\begin{equation}
+	\frac{d\rho}{d\tau} = \frac{a^2}{R_0^2 \rho}\frac{X_C - X_{eq}\exp(1/(X_p\rho))}{X_p - X_{eq}exp(1/(x_p\rho))} + \frac{1}{\nu}\frac{d\nu}{d\tau}(\frac{\alpha}{S} - \rho) 
+\end{equation}
+
+The other parameters of equation are expressed as follows:
+
+\begin{subequations}
+	\begin{align}
+\beta_0 = \frac{4\pi R_0^2 X_{C0}Z}{a^2} \\
+\Delta G_0 = \frac{(4/3) \pi R_0^2 \gamma}{kT} 
+	\end{align}	
+\end{subequations}
+
+The solute balance change during a time increment dt is then calculated as:
+
+\begin{equation}
+\frac{dX_C}{d\tau} = h(X_C - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)^2}
+\end{equation}
+
+with $h = (4/3)\pi N_0R_0^3$
+
+%\bibliographystyle{plainnat}
+%\bibliography{library}
 
 \end{document}
  
