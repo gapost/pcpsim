@@ -67,7 +67,7 @@ toc
 
 [xdot,S] = func(x',u,P);
 
-subplot(3,1,1)
+subplot(3,2,1)
 loglog(u,x(:,2),'.-')
 hold on
 loglog(u,1./S,'.-')
@@ -75,14 +75,32 @@ hold off
 xlabel('u ');
 ylabel('R ');
 
-subplot(3,1,2)
+subplot(3,2,2)
+semilogx(u,xdot(2,:),'.-')
+xlabel('u ');
+ylabel('dR/du ');
+
+subplot(3,2,3)
 loglog(u,x(:,3),'.-')
 xlabel('u');
 ylabel('Solute mole fraction');
 
-subplot(3,1,3)
+subplot(3,2,4)
+semilogx(u,xdot(3,:),'.-')
+xlabel('u ');
+ylabel('dC/du ');
+
+subplot(3,2,5)
 loglog(u(2:end),x(2:end,1),'.-')
-%ylim([1e-20 1e-10])
 xlabel('u');
 ylabel('Density ');
 
+subplot(3,2,6)
+semilogx(u,xdot(1,:),'.-')
+xlabel('u ');
+ylabel('dN/du ');
+
+u1 = u(1);
+B = P.S0.^2 / 2 / P.b0;
+A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
+Na = -A*B*expint(B/u1)+ A* exp(-B/u1)*u1;
