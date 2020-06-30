@@ -36,35 +36,41 @@ u = D*t'./P.a^2;
 u = linspace(1e0,1e4,1e5);
 u = logspace(0, 15, 50);
 
-function [xdot, Xc] = func(x,u,P)
 
-S = P.Xp*log(x(3)./P.Xeqs) +(1-P.Xp).*log((1-x(3))./(1-P.Xeqs));
+function [xdot, S] = func(x,u,P)
 
-xdot(1) = (P.b0/S.^2) .*exp(-P.dG0/S.^2) .*exp(-(S.^2)./(2*P.b0*u)); 
+xdot = zeros(size(x));
+
+S = P.Xp*log(x(3,:)./P.Xeqs) +(1-P.Xp).*log((1-x(3,:))./(1-P.Xeqs));
+
+xdot(1,:) = (P.b0./S.^2) .*exp(-P.dG0./S.^2) .*exp(-(S.^2)./(2*P.b0*u)); 
 
 B = P.S0.^2 / 2 / P.b0;
 
-if (u<(0.005*B))
+y = u/B;
+if y<0.005,
   y = B^2/u.^2;
-  else
-  y = xdot(1)./ x(1);
+else
+  y = xdot(1,:)./ x(1,:);
 endif
 
-xdot(2) = (P.a^2/P.R0s^2/x(2)) .*((x(3) - P.Xeqs*exp(1/P.Xp/x(2))) ./ (P.Xp - P.Xeqs*exp(1/P.Xp/x(2)))) - y.*(1.05/S - x(2));
-xdot(3) = P.h*(x(3) - P.Xp) .* (xdot(1).*x(2).^3 + 3*x(1).*x(2).^2 .*xdot(2)) ./ (1 - P.h* x(1).*x(2).^3).^2;
+xdot(2,:) = (P.a^2/P.R0s^2./x(2,:)) .*((x(3,:) - P.Xeqs*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs*exp(1/P.Xp./x(2,:)))) - y.*(1.05 ./S - x(2,:));
+xdot(3,:) = P.h*(x(3,:) - P.Xp) .* (xdot(1,:).*x(2,:).^3 + 3*x(1,:).*x(2,:).^2 .*xdot(2,:)) ./ (1 - P.h* x(1,:).*x(2,:).^3).^2;
+
 endfunction
 
 ifunc = @(x,u) func(x,u,P);
 
+tic
 x = lsode (ifunc, [0 1.05/P.S0 0.0007], u); % [0 0.88 0.9209537139] 
+toc
 
-AS = P.Xp*log(x(:,3)./P.Xeqs) +(1-P.Xp).*log((1-x(:,3))./(1-P.Xeqs));
-ARsS = 1 ./AS;
+[xdot,S] = func(x',u,P);
 
 subplot(3,1,1)
 loglog(u,x(:,2),'.-')
 hold on
-loglog(u,ARsS,'.-')
+loglog(u,1./S,'.-')
 hold off
 xlabel('u ');
 ylabel('R ');
