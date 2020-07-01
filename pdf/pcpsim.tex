@@ -194,6 +194,21 @@ The rate of variation of the density of precipitates in pure coarsening is:
 \frac{d\nu}{d\tau} = \frac{\dot{\rho}}{\rho} \left[  \frac{X_C-(1-X_C)}{(X_C - X_p)^2 \rho} \left( \frac{1}{h\rho^3} - \nu\right)  - 3\nu \right] 
 \end{equation}
 
+In order to go continuously from the growth stage to the coarsening stage, we de®ne a coarsening fraction:
+
+\begin{subequations}
+	\begin{align}
+	\frac{d\rho}{\tau} = (1-f_{coars}) \frac{d\rho}{d\tau}~ _{growth}  + f_{coars} \frac{d\rho}{d\tau}~ _{coars}
+	\frac{d\nu}{\tau} = f_{coars} \frac{d\nu}{d\tau}~ _{growth}
+	\end{align} 
+\end{subequations}
+
+The $f_{coars} = 0$ when $R >> R^*$ and $f_{coars} = 1$ when $R = R^*$. The $f_{coars}$ function has the following expression which fulfills these
+requirements:
+
+\begin{equation}
+f_{coars} = 1 - erf \left(4(\rho \cdot S - 1) \right)
+\end{equation}
 %\bibliographystyle{plainnat}
 %\bibliography{library}
 
