@@ -81,7 +81,7 @@ S =  X_p \ln(\frac{X_C}{X_{eq}} ) - (1 - X_p) \ln(\frac{1 - X_C}{X_{eq}})
 \end{equation}
 
 where $V_{at}$ is the atomic volume (considered as constant for all species), $S$ is a thermodynamical  function giving the driving force for nucleation (based
-on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the nitrogen mole fraction in the precipitate, and $X_C$ the current solute mole fraction of the matrix.
+on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the carbon mole fraction in the precipitate, and $X_C$ the current solute mole fraction of the matrix.
 
 The nucleation rate as the derivative of the precipitation density $N$ is:
 
@@ -136,7 +136,7 @@ Thus the equations (\ref{P_density}),(\ref{P_radius}) are replaced by the follow
 \end{equation}
 
 \begin{equation}
-	\frac{d\rho}{d\tau} = \frac{a^2}{R_0^2 \rho}\frac{X_C - X_{eq}\exp(1/(X_p\rho))}{X_p - X_{eq}exp(1/(x_p\rho))} + \frac{1}{\nu}\frac{d\nu}{d\tau}(\frac{\alpha}{S} - \rho) 
+	\frac{d\rho}{d\tau} = \frac{a^2}{R_0^2 \rho}\frac{X_C - X_{eq}\exp(1/(X_p\rho))}{X_p - X_{eq}exp(1/(X_p\rho))} + \frac{1}{\nu}\frac{d\nu}{d\tau}(\frac{\alpha}{S} - \rho) 
 \end{equation}
 
 The other parameters of equation are expressed as follows:
@@ -150,9 +150,12 @@ The other parameters of equation are expressed as follows:
 
 The solute balance change during a time increment dt is then calculated as:
 
-\begin{equation}
-\frac{dX_C}{d\tau} = h(X_C - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)^2}
-\end{equation}
+\begin{subequations}
+	\begin{align}
+\frac{dX_C}{d\tau} = h(X_C - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)} \\ 
+\frac{dX_C}{d\tau} = h(X_{C0} - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)^2} 
+	\end{align}
+\end{subequations}
 
 with $h = (4/3)\pi N_0R_0^3$
 

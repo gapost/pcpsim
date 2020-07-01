@@ -55,14 +55,18 @@ else
 endif
 
 xdot(2,:) = (P.a^2/P.R0s^2./x(2,:)) .*((x(3,:) - P.Xeqs*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs*exp(1/P.Xp./x(2,:)))) - y.*(1.05 ./S - x(2,:));
-xdot(3,:) = P.h*(x(3,:) - P.Xp) .* (xdot(1,:).*x(2,:).^3 + 3*x(1,:).*x(2,:).^2 .*xdot(2,:)) ./ (1 - P.h* x(1,:).*x(2,:).^3).^2;
+xdot(3,:) = P.h*(x(3,:) - P.Xp) .* (xdot(1,:).*x(2,:).^3 + 3*x(1,:).*x(2,:).^2 .*xdot(2,:)) ./ (1 - P.h* x(1,:).*x(2,:).^3);
 
 endfunction
 
 ifunc = @(x,u) func(x,u,P);
 
+B = P.S0.^2 / 2 / P.b0;
+A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
+Na = -A*B*expint(B/u(1))+ A* exp(-B/u(1))*u(1);
+
 tic
-x = lsode (ifunc, [0 1.05/P.S0 0.0007], u); % [0 0.88 0.9209537139] 
+x = lsode (ifunc, [Na 1.05/P.S0 0.0007], u); % [0 0.88 0.9209537139] 
 toc
 
 [xdot,S] = func(x',u,P);
@@ -101,6 +105,3 @@ xlabel('u ');
 ylabel('dN/du ');
 
 u1 = u(1);
-B = P.S0.^2 / 2 / P.b0;
-A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
-Na = -A*B*expint(B/u1)+ A* exp(-B/u1)*u1;
