@@ -51,7 +51,6 @@
 \author{
   A. Theodorou\\
   \texttt{theoda@ipta.demokritos.gr}
-
 }
 \date{June 2020}
 \title{\texttt{pcpsim} \\ 
@@ -63,102 +62,133 @@ MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
 \maketitle
 
 \section{Introduction}
-The model for homogeneous isothermal precipitation is partly based on the model by Langer and Schwartz, modified by Kampmann and Wagner (MLS model). In this model, we treated the nucleation and growth of the precipitation.
+The model for homogeneous isothermal precipitation is partly based on the model by Langer and Schwartz, as modified by Kampmann and Wagner (MLS model) and describes the nucleation and growth of  precipitates from a solid solution.
 
 
-\section{Thermodynamics of the model}
+\section{Nucleation and Growth}
 
-As a first step we need to define the driving force for precipitation at any given time of the aging process.
- 
+As a first step we need to define the driving force for precipitation at any given time of the aging process: 
 \begin{equation}
 \Delta g = - \frac{kT}{V_{at}} \cdot S 
 \end{equation}
-
 with
-
 \begin{equation}
-S =  X_p \ln(\frac{X_C}{X_{eq}} ) - (1 - X_p) \ln(\frac{1 - X_C}{X_{eq}}) 
+S =  X_p \ln\frac{X_C}{X_{eq}} + (1 - X_p) \ln\frac{1 - X_C}{1-X_{eq}} 
 \end{equation}
+where $V_{at}$ is the atomic volume (considered as constant for all species, $V_{at}=a^3/2$ for a bcc structure with lattice parameter $a$), $S$ is a thermodynamical function giving the driving force for nucleation (based
+on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the solute mole fraction in the precipitate, and $X_C$ the current solute mole fraction of the matrix.
 
-where $V_{at}$ is the atomic volume (considered as constant for all species), $S$ is a thermodynamical  function giving the driving force for nucleation (based
-on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the carbon mole fraction in the precipitate, and $X_C$ the current solute mole fraction of the matrix.
-
-The nucleation rate as the derivative of the precipitation density $N$ is:
-
+The nucleation rate as the time derivative of the precipitate volume density $N$ is:
 \begin{equation}
 \label{P_density}
 \frac{d N}{d t} = N_0 Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{t_i}{t})
 \end{equation}
-
-where $N_0$ is the number of nucleation sites per unit volume ($\approx  l/vat =2/a^3$ for a bcc structure with lattice parametera), Z is the Zeldovich factor ($\approx$ 1/20), $t_i$ is the incubation time. The other parameters of equation are expressed as follows:
+where $N_0$ is the number of nucleation sites per unit volume (for homogeneous nucleation $N_0 = 1/ V_{at}$), $Z$ is the Zeldovich factor ($\approx$ 1/20), $t_i$ is the incubation time. The other parameters of equation are expressed as follows:
 
 \begin{subequations}
 	\begin{align}
-\beta^* = \frac{4\pi R^{*2} D X_{C0}}{a^4} \\
-R^* = \frac{R_0}{S} \\
-R_0 = \frac{2\gamma V_{at}}{kT} \\
-\Delta G^* = \frac{16}{3}\pi \frac{\gamma}{\delta g} \\
-t_i = \frac{1}{2\beta^* Z} \\
+\beta^* &= \frac{4\pi R^{*2} D X_{0}}{a^4} \\
+R^* &= \frac{R_0}{S} \\
+R_0 &= \frac{2\gamma V_{at}}{kT} \\
+\Delta G^* &= \frac{4\pi R_0^2 \gamma}{3 S^2} \\
+t_i &= \frac{1}{2\beta^* Z} 
 	\end{align}	
 \end{subequations}
+where $R^*$ is the critical nucleation radius, $R_0$ is a thermodynamical parameter
+which has the dimension of a length, $\gamma$ is the matrix/precipitate interfacial energy, $D$ is the diffusion coefficient of solute atoms in the matrix, $X_{0}$ is the initial solute mole fraction.
 
-where $R^*$ is the nucleation critical radius, R0 is a thermodynamical parameter
-which has the dimension of a length, $\gamma$ is the matrix/precipitate interfacial energy, $D$ is the diffusion coefficient of solute atoms in the matrix, $X_{C0}$ is the initial solute mole fraction.
-
-The precipitate size increase during a time increment dt is then calculated as:
+The precipitate size increase during a time increment $dt$ is then calculated as:
 \begin{equation}
 \label{P_radius}
-\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - X_{eq} exp(R_0/(X_pR))}{X_p - X_{eq} exp(R_0/(X_pR))} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
+\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - \hat{X}_C}{\hat{X}_p - \hat{X}_C} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
 \end{equation}
 
-The first term corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect) and the second term to the appearance of the new nuclei of
-size $R^*$. The numerical factor $\alpha = 1.05$ results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size. 
-Finally, the coupling between the precipitation density and their mean radius is made through the solute balance:
-
-\begin{equation}
-X_c = \frac{X_{C0}-(4/3)\pi (X_pNR^3)}{1-(4/3)\pi (NR^3)}
-\end{equation}
-
-\subsection{Nucleation and growth}
-Now the new dimensionless variables are defined that are easier to use for programming.
-
+The first term on the left hand side of \eqref{P_radius} corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect). $\hat{X}_{p,C}$ represent the solute concentration at the interface ($r=R$) in the precipitate and the matrix, respectively, as modified by surface tension according to the Gibbs-Thomson effect. For an ideal solution they are given by \citep{Wagner-2005-HomogeneousSecond-P,Calderon-1994-Ostwaldripeningin}:
 \begin{subequations}
 	\begin{align}
-\tau = \frac{D\cdot t}{a^2} \\
-\nu = \frac{N}{N0} \\
-\rho = \frac{R}{R_0}\\
-	\end{align}
-\end{subequations}
-
-Thus the equations (\ref{P_density}),(\ref{P_radius}) are replaced by the following dimensionless differential equations:
-
-\begin{equation}
-	\frac{d\nu}{d\tau} = \frac{\beta_0}{S^2} \exp(-\frac{\Delta G_0}{S^2}) exp(-\frac{S^2}{2\beta_0 \tau}) 
-\end{equation}
-
-\begin{equation}
-	\frac{d\rho}{d\tau} = \frac{a^2}{R_0^2 \rho}\frac{X_C - X_{eq}\exp(1/(X_p\rho))}{X_p - X_{eq}exp(1/(X_p\rho))} + \frac{1}{\nu}\frac{d\nu}{d\tau}(\frac{\alpha}{S} - \rho) 
-\end{equation}
-
-The other parameters of equation are expressed as follows:
-
-\begin{subequations}
-	\begin{align}
-\beta_0 = \frac{4\pi R_0^2 X_{C0}Z}{a^2} \\
-\Delta G_0 = \frac{(4/3) \pi R_0^2 \gamma}{kT} 
+\hat{X}_C &=  X_{eq} \cdot \exp \left( \frac{R_0}{R} \frac{1-X_{eq}}{X_p - X_{eq}}\right) \\
+\hat{X}_p &=   X_{p} \cdot \exp \left( \frac{R_0}{R} \frac{1-X_{p}}{X_p - X_{eq}}\right)
 	\end{align}	
 \end{subequations}
 
-The solute balance change during a time increment dt is then calculated as:
+The second term of \eqref{P_radius} is due to the appearance of new nuclei of
+size $R^*$. The numerical factor $\alpha = 1.05$ results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size. 
 
+Finally, the coupling between the precipitation density and their mean radius is made through the solute balance:
+\begin{equation}
+X_0 = X_C\,(1-\Phi) + X_p\,\Phi
+\end{equation}
+where $\Phi=\frac{4}{3}\pi R^3 N$ is the precipitate volume fraction.
+
+\subsection{Dimensionless formulation}
+Now the following dimensionless variables are defined that are easier to use for programming:
 \begin{subequations}
 	\begin{align}
-\frac{dX_C}{d\tau} = h(X_C - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)} \\ 
-\frac{dX_C}{d\tau} = h(X_{C0} - X_p) \frac{(\dot{\nu}\rho^3 + 3\nu \rho^2 \dot{\rho})}{(1 - h \nu \rho^3)^2} 
+\tau &= \frac{D\cdot t}{a^2} \\
+\nu &= \frac{N}{N_0} \\
+\rho &= \frac{R}{R_0}
 	\end{align}
 \end{subequations}
 
-with $h = (4/3)\pi N_0R_0^3$
+Thus the equations (\ref{P_density}), (\ref{P_radius}) are replaced by the following dimensionless differential equations:
+\begin{align}
+\frac{d\nu}{d\tau} &= 
+\frac{\beta_0}{S^2} 
+\exp\left( -\frac{\Delta G_0}{S^2}\right)  
+\exp\left( -\frac{S^2}{2\beta_0 \tau}\right)  \\
+%%%%
+\frac{d\rho}{d\tau} &= \frac{a^2}{R_0^2}  
+\; \frac{X_C - \hat{X}_C}{\hat{X}_p - \hat{X}_C} 
+\; \frac{1}{\rho}
++ 
+\frac{1}{\nu}\frac{d\nu}{d\tau}
+\left( \frac{\alpha}{S} - \rho \right)
+\end{align}
+where
+\begin{align}
+\beta_0 &= \frac{4\pi R_0^2 X_{0}Z}{a^2} \\
+\Delta G_0 &= \frac{4\pi R_0^2 \gamma}{3kT}  
+\end{align}
+
+Differentiating the solute balance equation we obtain change rate of $X_C$:
+\begin{equation}
+\frac{dX_C}{d\tau} = -(X_p - X_C)\, \frac{\Phi}{1-\Phi} \,
+\left[ 3\frac{\dot{\rho}}{\rho} + \frac{\dot{\nu}}{\nu} \right]
+\end{equation}
+where $\Phi = \Phi_0 \rho^3 \nu$, $\Phi_0 = \frac{4}{3}\pi R_0^3 N_0$.
+
+
+\section{Coarsening}
+In late stages of precipitation the nucleation rate progressively decreases because the current solute concentration in the matrix ($X_C$) decreases and $X_C - X_{eq} \approx 0$, this means that it is no longer supersaturated. 
+
+The precipitates continue to grow according to eq. \eqref{P_radius}. In the long time limit the LSW theory predicts that the volume of the precipitates grows linearly with time, $R^3 \propto t$.
+
+The growth rate of $R$ for an ideal solution in the long time limit becomes \citep{Calderon-1994-Ostwaldripeningin}
+\begin{equation}
+\label{R_coarsening}
+\frac{dR}{dt} = \frac{4}{27}
+\;\frac{X_{eq}\, (1-X_{eq})}{(X_{p} - X_{eq} )^2}
+\;\frac{D R_0}{R^2}
+\end{equation}
+
+Furthermore, $R$ becomes equal to $R^*=R_0/S$ \citep{Deschamps-1998-Influenceofpredefo} (???). In this limit the value of $S$ is
+\begin{equation}
+S_\infty \approx (X_C-X_{eq}) \frac{X_p-X_{eq}}{X_{eq}(1-X_{eq})}
+\end{equation}
+and thus
+\begin{equation}
+X_C - X_{eq} = \frac{X_{eq}(1-X_{eq})}{X_p-X_{eq}} \frac{R_0}{R} \propto t^{-1/3}
+\end{equation}
+
+The precipitate volume fraction tends to the constant limiting value
+\begin{equation}
+\Phi = \frac{X_0 - X_{C}}{X_p-X_C} \approx \frac{X_0 - X_{eq}}{X_p-X_{eq}} = \Phi_\infty
+\end{equation}
+and
+\begin{equation}
+N = \frac{3\Phi_\infty}{4\pi R^3} \propto t^{-1}
+\end{equation}
+
 
 \subsection{Growth and coarsening}
 In late stages of precipitation the nucleation rate progressively decreases because the current solute concentration in the matrix ($X_C$) decreases and $X_C - X_{eq} \approx 0$, this means that it is no longer supersaturated. The alloy experiences a combination of growth and coarsening. When the mean radius of precipitates ($R$) is much larger than the critical radius ($R^*$) takes places the growth phase which is described by the equations:
@@ -209,8 +239,9 @@ requirements:
 \begin{equation}
 f_{coars} = 1 - erf \left(4(\rho \cdot S - 1) \right)
 \end{equation}
-%\bibliographystyle{plainnat}
-%\bibliography{library}
+
+\bibliographystyle{plainnat}
+\bibliography{pcpsim}
 
 \end{document}
  
