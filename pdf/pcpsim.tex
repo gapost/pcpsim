@@ -119,6 +119,7 @@ Finally, the coupling between the precipitation density and their mean radius is
 X_c = \frac{X_{C0}-(4/3)\pi (X_pNR^3)}{1-(4/3)\pi (NR^3)}
 \end{equation}
 
+\subsection{Nucleation and growth}
 Now the new dimensionless variables are defined that are easier to use for programming.
 
 \begin{subequations}
@@ -158,6 +159,40 @@ The solute balance change during a time increment dt is then calculated as:
 \end{subequations}
 
 with $h = (4/3)\pi N_0R_0^3$
+
+\subsection{Growth and coarsening}
+In late stages of precipitation the nucleation rate progressively decreases because the current solute concentration in the matrix ($X_C$) decreases and $X_C - X_{eq} \approx 0$, this means that it is no longer supersaturated. The alloy experiences a combination of growth and coarsening. When the mean radius of precipitates ($R$) is much larger than the critical radius ($R^*$) takes places the growth phase which is described by the equations:
+
+\begin{subequations}
+		\begin{align}
+ \frac{d\rho}{d\tau} = \frac{a^2}{R_0^2 \rho}\frac{X_C -X_{eq}\exp(1/(X_p\rho))}{X_p - X_{eq}exp(1/(X_p\rho))}  \\
+ \frac{d\nu}{d\tau} = 0 
+ 	\end{align} 
+\end{subequations}
+
+When the mean radius and the critical radius are equal the equations follow the LSW law :
+
+\begin{subequations}
+	\begin{align}
+	\frac{d\rho}{d\tau} = \frac{4}{27}\frac{X_{eq}}{1 (or~X_p) - X_{eq}} \frac{a^2}{R_0^2 \rho} \\
+	\frac{d\nu}{d\tau} = 0 
+	\end{align} 
+\end{subequations}
+
+Differentiating the second equation, one can deduce the variation of the matrix solute concentration with time in pure coarsening:
+
+\begin{subequations}
+	\begin{align}
+	\frac{dS}{d\tau} = \frac{\dot{X_C}(X_p - X_C)}{X_C(1-X_C)} \\
+	\frac{dX_C}{d\tau} = \frac{X_C(1-X_C)}{X_C-X_P} \frac{1}{\rho^2} \frac{d\rho}{d\tau}
+	\end{align} 
+\end{subequations}
+
+The rate of variation of the density of precipitates in pure coarsening is:
+
+\begin{equation}
+\frac{d\nu}{d\tau} = \frac{\dot{\rho}}{\rho} \left[  \frac{X_C-(1-X_C)}{(X_C - X_p)^2 \rho} \left( \frac{1}{h\rho^3} - \nu\right)  - 3\nu \right] 
+\end{equation}
 
 %\bibliographystyle{plainnat}
 %\bibliography{library}
