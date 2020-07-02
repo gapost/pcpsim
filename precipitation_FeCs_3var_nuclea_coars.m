@@ -34,7 +34,7 @@ P.S0 = P.Xp*log(P.Xc0./P.Xeqs) +(1-P.Xp).*log((1-P.Xc0)./(1-P.Xeqs));
 
 %u = D*t'./P.a^2;
 
-u = logspace(0, 10, 50);
+u = logspace(-1, 15, 151);
 
 
 %ifunc = @(x,u) nuclea_coars(x,u,P);
@@ -42,50 +42,58 @@ ifunc = @(x,u) nuclea(x,u,P);
 
 B = P.S0.^2 / 2 / P.b0;
 A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
+
+x1 = u(1)/B;
+if x1<0.002,
+  u1=0.002*B;
+  i = find(u>u1);
+  u=[u1 u(i)];
+endif
+x1 = u(1)/B;
+
 Na = -A*B*expint(B/u(1))+ A* exp(-B/u(1))*u(1);
 
 tic
-%x = lsode (ifunc, [Na 1.05/P.S0 0.0007], u); % [0 0.88 0.9209537139] 
-x = lsode (ifunc, [Na 1.05/P.S0 0.0007], u); % [0 0.88 0.9209537139]
+x = lsode (ifunc, [Na 1.05/P.S0 0.0007], u); 
 toc
 
 %[xdot, fcoars, S] = nuclea_coars(x',u,P);
 [xdot, F, S] = nuclea(x',u,P);
 
-u = u*P.a^2/D/60;
+t = u*P.a^2/D/60;
 
 figure 1
 subplot(3,2,1)
-loglog(u,x(:,2).*P.R0s,'.-')
+loglog(t,x(:,2).*P.R0s,'.-')
 hold on
-loglog(u,P.R0s./S,'.-')
+loglog(t,P.R0s./S,'.-')
 hold off
 xlabel('t (min) ');
 ylabel('R (nm) ');
 
 subplot(3,2,2)
-semilogx(u,xdot(2,:),'.-')
-xlabel('u ');
+semilogx(t,xdot(2,:),'.-')
+xlabel('t (min) ');
 ylabel('dR/du ');
 
 subplot(3,2,3)
-loglog(u,x(:,3),'.-')
+loglog(t,x(:,3),'.-')
 xlabel('t (min)');
 ylabel('Solute mole fraction');
 
 subplot(3,2,4)
-semilogx(u,xdot(3,:),'.-')
-xlabel('u ');
+semilogx(t,xdot(3,:),'.-')
+xlabel('t (min)');
 ylabel('dC/du ');
 
 subplot(3,2,5)
-semilogx(u(2:end),x(2:end,1)*N0*1e9,'.-')
+semilogx(t,x(:,1)*N0*1e9,'.-')
 xlabel('t (min)');
 ylabel('Density (\mu m^3)');
 
 subplot(3,2,6)
 %semilogx(u,xdot(1,:),'.-')
-semilogx(u,F,'.-')
+semilogx(t,F,'.-')
 xlabel('t (min)');
 ylabel('Transformed volume fraction ');
 
