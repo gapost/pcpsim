@@ -29,7 +29,7 @@ P.R0s = (2*gs*Vat)/(Kb*Ta); %[nm]
 
 P.b0 = (4*pi*P.R0s^2*P.Xc0*Z)./P.a^2;
 P.dG0 = (4/3)*pi*P.R0s^2*gs/Kb/Ta;
-P.h = (4/3)*pi*N0*P.R0s^3;
+P.F0 = (4/3)*pi*N0*P.R0s^3;
 P.S0 = P.Xp*log(P.Xc0./P.Xeqs) +(1-P.Xp).*log((1-P.Xc0)./(1-P.Xeqs));
 
 %u = D*t'./P.a^2;
@@ -38,7 +38,8 @@ u = logspace(-1, 15, 151);
 
 
 %ifunc = @(x,u) nuclea_coars(x,u,P);
-ifunc = @(x,u) nuclea(x,u,P);
+ifunc = @(x,u) nuclea_v2(x,u,P);
+%ifunc = @(x,u) nuclea_coars_calder(x,u,P);
 
 B = P.S0.^2 / 2 / P.b0;
 A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
@@ -58,7 +59,8 @@ x = lsode (ifunc, [Na 1.05/P.S0 0.0007], u);
 toc
 
 %[xdot, fcoars, S] = nuclea_coars(x',u,P);
-[xdot, F, S] = nuclea(x',u,P);
+[xdot, F, S] = nuclea_v2(x',u,P);
+%[xdot, fcoars, S] = nuclea_coars_calder(x',u,P);
 
 t = u*P.a^2/D/60;
 
