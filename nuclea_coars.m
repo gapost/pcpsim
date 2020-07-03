@@ -15,7 +15,7 @@ else
   y = xdot(1,:)./ x(1,:);
 endif
 
-Rcoars = (4./27) .* (P.Xeqs./(P.Xp-P.Xeqs)) .* (P.a^2./(P.R0s.^2 .* x(2,:).^2));
+Rcoars = (4./27) .* (P.Xeqs*(1-P.Xeqs)./(P.Xp-P.Xeqs).^2) .* (P.a^2./(P.R0s.^2 .* x(2,:).^2));
 Rgrowth = (P.a^2/P.R0s^2./x(2,:)) .*((x(3,:) - P.Xeqs*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs*exp(1/P.Xp./x(2,:)))) - y.*(1.05 ./S - x(2,:));
 %Rgrowth = (P.a^2/P.R0s^2./x(2,:)) .*((x(3,:) - P.Xeqs*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs*exp(1/P.Xp./x(2,:))));
 
