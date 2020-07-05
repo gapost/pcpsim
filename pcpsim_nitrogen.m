@@ -31,7 +31,7 @@ P.R0s = (2*gs*Vat)/(Kb*Ta); %[nm]
 
 P.b0 = (4*pi*P.R0s^2*P.Xc0*Z)./P.a^2;
 P.dG0 = (4/3)*pi*P.R0s^2*gs/Kb/Ta;
-P.h = (4/3)*pi*N0*P.R0s^3;
+P.F0 = (4/3)*pi*N0*P.R0s^3;
 P.S0 = P.Xp*log(P.Xc0./P.Xeqs) +(1-P.Xp).*log((1-P.Xc0)./(1-P.Xeqs));
 
 %u = D*t'./P.a^2;

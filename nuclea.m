@@ -3,7 +3,7 @@ function [xdot, F, S] = nuclea(x,u,P)
 xdot = zeros(size(x));
 S = P.Xp*log(x(3,:)./P.Xeqs) +(1-P.Xp).*log((1-x(3,:))./(1-P.Xeqs));
 
-F = P.h * x(2,:).^3 .* x(1,:);
+F = P.F0 * x(2,:).^3 .* x(1,:);
 
 B = P.S0.^2 / 2 / P.b0;
 
