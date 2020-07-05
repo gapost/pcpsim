@@ -1,7 +1,9 @@
 clear
 clf
 
-Ta = 373; %ageing temperature [K]
+Ta = [300 307.80 320.55 333.85 347.70 362.10 377.10 392.75 409.05 426.00 ...
+      443.65 462.05 481.25 501.20 521.95 543.60 566.15 589.65 614.10 639.55 ...
+      666.10, 693.70]'; %ageing temperature [K]
 Rgas = 8.314; % gas constant [J/K*mol]
 Kb = 1.38e-23; %boltzmann constant [J/K]
 Kb1 = 8.617e-5; %boltzmann constant [eV/K]
@@ -14,7 +16,7 @@ P.Xeqs = 10.^(2.43 - 1840./Ta) *1e-2;
 
 D0 = 1.26e-7; %Pre-exp. diffusion [m^2/s]
 Qd = 0.76; %energy for diffusion [ev]
-D =D0*exp(-Qd/(Kb1*Ta))*1e+18; %diffusion coefficient [nm^2/s]
+D =D0*exp(-Qd/(Kb1.*Ta))*1e+18; %diffusion coefficient [nm^2/s]
 
 P.a = 2.86e-10*1e9; %latrice parameter [nm]
 Z = 1/20; %Zeldovich factor
@@ -27,76 +29,60 @@ P.Xp = 1/9;  %mole fraction of precipitation
 Vat = P.a^3/2; %Atomic volume of bcc iron [nm^3]
 N0 = 1/Vat; %Number of sites per unit volume [1/nm^3]
 
-P.R0s = (2*gs*Vat)/(Kb*Ta); %[nm] 
+P.R0s = (2*gs*Vat)/(Kb.*Ta); %[nm] 
 
-P.b0 = (4*pi*P.R0s^2*P.Xc0*Z)./P.a^2;
-P.dG0 = (4/3)*pi*P.R0s^2*gs/Kb/Ta;
-P.h = (4/3)*pi*N0*P.R0s^3;
+P.b0 = (4*pi.*P.R0s.^2*P.Xc0*Z)./P.a^2;
+%P.dG0 = (4/3)*pi.*P.R0s.^2*gs/Kb./Ta;
+P.dG0 = (4/3)*pi.*P.R0s.^2.*gs;
+P.h = (4/3)*pi*N0.*P.R0s.^3;
 P.S0 = P.Xp*log(P.Xc0./P.Xeqs) +(1-P.Xp).*log((1-P.Xc0)./(1-P.Xeqs));
+
+Rc = P.R0s ./ P.S0'; 
+dGc = P.dG0 ./ P.S0'.^2;
+bc = (4*pi.*Rc.^2*P.Xc0.*D*Z)./P.a^4; 
+tc = 1 ./ (2.*bc);
+
+A = N0.*bc.*exp(-dGc./Ta'/Kb);
 
 %u = D*t'./P.a^2;
 u = logspace(0, 15, 51);
-
-
-%ifunc = @(x,u) nuclea_coars(x,u,P);
-ifunc = @(x,u) nuclea(x,u,P);
-%ifunc = @(x,u) nuclea_coars_calder(x,u,P);
-
-B = P.S0.^2 / 2 / P.b0;
-A = (P.b0./P.S0.^2) .*exp(-P.dG0./P.S0.^2);
-
-x1 = u(1)/B;
-if x1<0.002,
-  u1=0.002*B;
-  i = find(u>u1);
-  u=[u1 u(i)];
-endif
-x1 = u(1)/B;
-
-Na = -A*B*expint(B/u(1))+ A* exp(-B/u(1))*u(1);
-
-tic
-x = lsode (ifunc, [Na 1.05/P.S0 P.Xc0], u); 
-toc
-
-%[xdot, fcoars, S] = nuclea_coars(x',u,P);
-[xdot, F, S] = nuclea(x',u,P);
-%[xdot, fcoars, S] = nuclea_coars_calder(x',u,P);
-
-t = u*P.a^2/D/60;
+%t = u*P.a^2./D/60;
+t = logspace(-4, 4, 22);
+B = exp(-tc./t);
 
 figure 1
 subplot(3,2,1)
-loglog(t,x(:,2).*P.R0s,'.-')
+semilogy(Ta,P.R0s,'.-')
 hold on
-loglog(t,P.R0s./S,'.-')
+semilogy(Ta,abs(Rc),'.-')
 hold off
-xlabel('t (min) ');
+xlabel('T (K) ');
 ylabel('R (nm) ');
 
 subplot(3,2,2)
-semilogx(t,xdot(2,:),'.-')
-xlabel('t (min) ');
-ylabel('dR/du ');
+semilogy(Ta,tc,'.-')
+xlabel('T(K) ');
+ylabel('Incubation time ');
 
 subplot(3,2,3)
-loglog(t,x(:,3),'.-')
-xlabel('t (min)');
-ylabel('Solute mole fraction');
+semilogy(Ta,dGc,'.-')
+xlabel('T (K)');
+ylabel('Critical Gibbs energy');
 
 subplot(3,2,4)
-semilogx(t,xdot(3,:),'.-')
-xlabel('t (min)');
-ylabel('dC/du ');
+semilogy(Ta,A,'.-')
+xlabel('T (K)');
+ylabel(' N0\cdotb*exp(-dGc./KTa)');
 
 subplot(3,2,5)
-semilogx(t,x(:,1)*N0*1e9,'.-')
-xlabel('t (min)');
-ylabel('Density (\mu m^3)');
+semilogy(Ta,P.Xeqs,'.-')
+hold on
+semilogy([300 700],[P.Xc0 P.Xc0],'.-')
+xlabel('T (K)');
+ylabel('C_{eq} ');
 
 subplot(3,2,6)
-%semilogx(u,xdot(1,:),'.-')
-semilogx(t,F,'.-')
-xlabel('t (min)');
-ylabel('Transformed volume fraction ');
+plot(Ta,B,'.-')
+xlabel('T (K)');
+ylabel('exp(-\tau / t)');
 
