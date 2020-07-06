@@ -88,9 +88,8 @@ where $N_0$ is the number of nucleation sites per unit volume (for homogeneous n
 \begin{subequations}
 	\begin{align}
 \beta^* &= \frac{4\pi R^{*2} D X_{0}}{a^4} \\
-R^* &= \frac{R_0}{S} \\
-R_0 &= \frac{2\gamma V_{at}}{kT} \\
-\Delta G^* &= \frac{4\pi R_0^2 \gamma}{3 S^2} \\
+R^* &= \frac{2\gamma V_{at}}{S\,kT} \\
+\Delta G^* &= \frac{4}{3}\pi R^{*2}\gamma \\
 t_i &= \frac{1}{2\beta^* Z} 
 	\end{align}	
 \end{subequations}
@@ -100,16 +99,13 @@ which has the dimension of a length, $\gamma$ is the matrix/precipitate interfac
 The precipitate size increase during a time increment $dt$ is then calculated as:
 \begin{equation}
 \label{P_radius}
-\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - \hat{X}_C}{\hat{X}_p - \hat{X}_C} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
+\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X_C - \hat{X}_{eq}}{\hat{X}_p - \hat{X}_{eq}} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
 \end{equation}
 
-The first term on the left hand side of \eqref{P_radius} corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect). $\hat{X}_{p,C}$ represent the solute concentration at the interface ($r=R$) in the precipitate and the matrix, respectively, as modified by surface tension according to the Gibbs-Thomson effect. For an ideal solution they are given by \citep{Wagner-2005-HomogeneousSecond-P,Calderon-1994-Ostwaldripeningin}:
-\begin{subequations}
-	\begin{align}
-\hat{X}_C &=  X_{eq} \cdot \exp \left( \frac{R_0}{R} \frac{1-X_{eq}}{X_p - X_{eq}}\right) \\
-\hat{X}_p &=   X_{p} \cdot \exp \left( \frac{R_0}{R} \frac{1-X_{p}}{X_p - X_{eq}}\right)
-	\end{align}	
-\end{subequations}
+The first term on the left hand side of \eqref{P_radius} corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect). $\hat{X}_{eq,p}$ represent the solute concentration at the interface ($r=R$) in the precipitate and the matrix, respectively, as modified by surface tension according to the Gibbs-Thomson effect. For an ideal solution they are given by \citep{Wagner-2005-HomogeneousSecond-P,Calderon-1994-Ostwaldripeningin}:
+\begin{equation}
+\hat{X}_{eq,p} =  X_{eq,p} \cdot \exp \left( \frac{2\gamma V_{at}}{kT\, R} \frac{1-X_{eq,p}}{X_p - X_{eq}}\right) 
+\end{equation}
 
 The second term of \eqref{P_radius} is due to the appearance of new nuclei of
 size $R^*$. The numerical factor $\alpha = 1.05$ results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size. 
@@ -125,8 +121,9 @@ Now the following dimensionless variables are defined that are easier to use for
 \begin{subequations}
 	\begin{align}
 \tau &= \frac{D\cdot t}{a^2} \\
-\nu &= \frac{N}{N_0} \\
-\rho &= \frac{R}{R_0}
+\nu &= N / N_0 \\
+R_0 &= \frac{2\gamma V_{at}}{kT} \\
+\rho &= R/R_0
 	\end{align}
 \end{subequations}
 
@@ -137,20 +134,23 @@ Thus the equations (\ref{P_density}), (\ref{P_radius}) are replaced by the follo
 \exp\left( -\frac{\Delta G_0}{S^2}\right)  
 \exp\left( -\frac{S^2}{2\beta_0 \tau}\right)  \\
 %%%%
-\frac{d\rho}{d\tau} &= \frac{a^2}{R_0^2}  
-\; \frac{X_C - \hat{X}_C}{\hat{X}_p - \hat{X}_C} 
+\frac{d\rho}{d\tau} &=  
+\frac{a^2}{R_0^2} 
+\frac{X_C - \hat{X}_{eq}}{\hat{X}_p - \hat{X}_{eq}} 
 \; \frac{1}{\rho}
 + 
 \frac{1}{\nu}\frac{d\nu}{d\tau}
-\left( \frac{\alpha}{S} - \rho \right)
+\left( \frac{\alpha R_0}{S} - \rho \right)
 \end{align}
 where
 \begin{align}
-\beta_0 &= \frac{4\pi R_0^2 X_{0}Z}{a^2} \\
-\Delta G_0 &= \frac{4\pi R_0^2 \gamma}{3kT}  
+\beta_0 &= 4\pi R_0^2 X_{0}Z / a^2 \\
+\Delta G_0 &= \frac{4\pi R_0^2 \gamma }{3kT}  \\
+\hat{X}_{eq,p} &= X_{eq,p} \exp 
+\left( \frac{1}{\rho} \frac{1-X_{eq,p}}{X_p - X_{eq}}\right)
 \end{align}
 
-Differentiating the solute balance equation we obtain change rate of $X_C$:
+Differentiating the solute balance equation we obtain the change rate of $X_C$:
 \begin{equation}
 \frac{dX_C}{d\tau} = -(X_p - X_C)\, \frac{\Phi}{1-\Phi} \,
 \left[ 3\frac{\dot{\rho}}{\rho} + \frac{\dot{\nu}}{\nu} \right]
