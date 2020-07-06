@@ -1,20 +1,35 @@
-function [xdot, F, S] = nuclea_anneal(x,u,P,k)
+function [xdot, fsat, S] = nuclea_anneal(x,u,P,k)
 
 xdot = zeros(size(x));
-
 S = P.Xp*log(x(3,:)./P.Xeqs(k)) +(1-P.Xp).*log((1-x(3,:))./(1-P.Xeqs(k)));
+F = P.F0(k) .* x(2,:).^3 .* x(1,:);
+B = P.S0(k).^2 ./ 2 ./ P.b0(k);
 
-F = P.F0(k) * x(2,:).^3 .* x(1,:);
+if k < 12,
+fsat = 1;
+else
+fsat = 0;
+endif   
 
-B = P.S0(k).^2 / 2 / P.b0(k);
+y = u/B;
+if y<0.005,
+  y = B^2/u.^2;
+else
+  y = xdot(1,:)./ x(1,:);
+endif
 
-y = xdot(1,:)./ x(1,:);
+Rgrowth = (P.a^2/P.R0s(k)^2./x(2,:)) .*((x(3,:) - P.Xeqs(k)*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs(k)*exp(1/P.Xp./x(2,:)))) - fsat*y.*(1.05 ./S - x(2,:));
 
-xdot(1,:) = (P.b0(k)./S.^2) .*exp(-P.dG0(k)./S.^2) .*exp(-(S.^2)./(2*P.b0(k)*u)); 
+Ngrowth = (P.b0(k)./S.^2) .*exp(-P.dG0(k)./S.^2) .*exp(-(S.^2)./(2*P.b0(k)*u)); 
 
-xdot(2,:) = (P.a^2/P.R0s(k)^2./x(2,:)) .*((x(3,:) - P.Xeqs(k)*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs(k)*exp(1/P.Xp./x(2,:)))) - y.*(1.05 ./S - x(2,:));
 
-xdot(3,:) = (x(3,:) - P.Xp) .* F ./ (1-F) .* (3*xdot(2,:)./x(2,:) + y );
+xdot(1,:) = fsat*Ngrowth;
+
+xdot(2,:) = Rgrowth;
+
+%Cgrowth = P.F0(k)*(x(3,:) - P.Xp) .* (xdot(1,:).*x(2,:).^3 + 3*x(1,:).*x(2,:).^2 .*xdot(2,:)) ./ (1 - P.F0(k)* x(1,:).*x(2,:).^3);
+xdot(3,:) = (x(3,:) - P.Xp) .* F ./ (1-F) .* (3.*xdot(2,:)./x(2,:) + fsat*y );
+%xdot(3,:) = Cgrowth;
 
 
 endfunction
