@@ -5,7 +5,8 @@ clf
 ##      443.65 462.05 481.25 501.20 521.95 543.60 566.15 589.65 614.10 639.55 ...
 ##      666.10, 693.70]';
 
-Ta = [300 307.80 320.55 333.85 347.70 362.10 377.10 392.75 409.05 426.00 443.65 462.05 ]';
+Ta = [300 307.80 320.55 333.85 347.70 362.10 377.10 392.75 409.05 426.00 443.65 462.05 ...
+      465 470 475 480 487]';
 
 Rgas = 8.314; % gas constant [J/K*mol]
 Kb = 1.38e-23; %boltzmann constant [J/K]
@@ -57,7 +58,7 @@ P.F0(k) = (4/3)*pi*N0*P.R0s(k)^3;
 P.S0(k) = P.Xp*log(C1(k)./P.Xeqs(k)) +(1-P.Xp).*log((1-C1(k))./(1-P.Xeqs(k)));
 
 tf(1) = 0.01;
-t = logspace(log10(tf(k)), log10(k*600), 50);
+t = logspace(log10(tf(k)), log10(k*480), 50);
 %t = linspace(tf(k), k*600, 50);
 u = t.*D(k)/P.a^2;
 
@@ -93,6 +94,7 @@ N1(k+1) = x(end,1);
 C1(k+1) = x(end,3);
 R1(k+1) = x(end,2);
 S1(k) = S(end);
+F1(k) = F(end);
 
 figure 1
 subplot(3,1,1)
@@ -118,7 +120,7 @@ hold off
 hold off
 
 figure 2
-subplot(4,1,1)
+subplot(5,1,1)
 semilogy(Ta,R1(2:end).*P.R0s,'.-')
 hold on
 semilogy(Ta,P.R0s./S1,'.-')
@@ -126,17 +128,22 @@ hold off
 xlabel('T (K) ');
 ylabel('R (nm) ');
 
-subplot(4,1,2)
+subplot(5,1,2)
 plot(Ta,C1(2:end)*1e6,'.-')
 xlabel('T (K) ');
 ylabel('Solute mole fraction (ppm)');
 
-subplot(4,1,3)
+subplot(5,1,3)
 plot(Ta,N1(2:end)*N0*1e9,'.-')
 xlabel('T (K)');
 ylabel('Density (\mu m^3)');
 
-subplot(4,1,4)
+subplot(5,1,4)
 semilogy(Ta,C1(2:end)./P.Xeqs,'.-')
 xlabel('T (K)');
 ylabel('C / C_{eq}');
+
+subplot(5,1,5)
+semilogy(Ta,F1,'.-')
+xlabel('T (K)');
+ylabel('Transformed volume fraction');

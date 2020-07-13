@@ -5,7 +5,8 @@ clf
 ##      443.65 462.05 481.25 501.20 521.95 543.60 566.15 589.65 614.10 639.55 ...
 ##      666.10, 693.70]';
 
-Ta = [300 307.80 320.55 333.85 347.70 362.10 377.10 392.75 409.05 426.00 443.65 462.05 481.25 501.20 521.95 543.60 566.15 589.65 614.10]';
+Ta = [300 307.80 320.55 333.85 347.70 362.10 377.10 392.75 409.05 426.00 443.65 462.05 ...
+     470 475 480 485 490 495 500.5 ]';
 
 Rgas = 8.314; % gas constant [J/K*mol]
 Kb = 1.38e-23; %boltzmann constant [J/K]
@@ -50,10 +51,10 @@ P.F0 = (4/3)*pi*N0.*P.R0s.^3;
 for k=13:N; 
 
 tf(13) = 0.01;
-t = logspace(log10(tf(k)), log10((k-12)*100), 50);
+t = logspace(log10(tf(k)), log10((k-12)*50), 480);
 %t = logspace(log10(tf(13)), log10(100), 50);
 %t = linspace(tf(k), k*600, 50);
-u = t.*D(9)/P.a^2;
+u = sqrt(t.*D(k)/P.a^2);
 
 uf(k) = u(end);
 tf(k+1) = t(end);
@@ -78,10 +79,13 @@ tic
 x2 = lsode (ifunc2, [ R1(k)*frcT(k) C1(k)], u); 
 toc
 
-[xdot2] = dissolve_anneal(x2',u,P,N1,k);
+[xdot2, Xc, F] = dissolve_anneal(x2',u,P,N1,k);
 
 R1(k+1) = x2(end,1);
-C1(k+1) = x2(end,2);
+%C1(k+1) = x2(end,2);
+C1(k+1) = Xc(end);
+%S1(k) = S(end);
+F1(k) = F(end);
 
 figure 1
 subplot(3,1,1)
@@ -91,7 +95,8 @@ xlabel('t (min) ');
 ylabel('R (nm) ');
 
 subplot(3,1,2)
-plot(t/60,x2(:,2),'.-')
+%plot(t/60,x2(:,2),'.-')
+plot(t/60,Xc,'.-')
 hold on
 xlabel('t (min)');
 ylabel('Solute mole fraction');
