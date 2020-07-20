@@ -1,12 +1,17 @@
-function [xdot, F, S] = nuclea_anneal(x,u,P,k)
+function [xdot, F, S] = nuclea_anneal(x,u,V)
+%V = [P.Xeqs(k) P.F0(k) P.S0(k) P.b0(k) P.dG0(k) P.a_R0(k) P.Xp];
 
 xdot = zeros(size(x));
-S = P.Xp*log(x(3,:)./P.Xeqs(k)) +(1-P.Xp).*log((1-x(3,:))./(1-P.Xeqs(k)));
-F = P.F0(k) .* x(2,:).^3 .* x(1,:);
-B = P.S0(k).^2 ./ 2 ./ P.b0(k);
+S = V(7)*log(x(3,:)./V(1)) +(1-V(7)).*log((1-x(3,:))./(1-V(1)));
+F = V(2) .* x(2,:).^3 .* x(1,:);
+B = V(3).^2 ./ 2 ./ V(4);
 
 S2 = S.^2;
-Sb0 = 
+b0_S2 = V(4)./S2;
+e_R = exp(1/V(7)./x(2,:));
+Xq = V(1) .* e_R;
+e_G_S = exp(-V(5)./S.^2);
+
 
 y = u/B;
 if y<0.005,
@@ -15,18 +20,17 @@ else
   y = xdot(1,:)./ x(1,:);
 endif
 
-Rgrowth = (P.a^2/P.R0s(k)^2./x(2,:)) .*((x(3,:) - P.Xeqs(k)*exp(1/P.Xp./x(2,:))) ./ (P.Xp - P.Xeqs(k)*exp(1/P.Xp./x(2,:)))) + y.*(1.05 ./S - x(2,:));
+Rgrowth = (V(6)./ x(2,:)) .*((x(3,:) - Xq) ./ (V(7) - Xq)) + y.*(1.05 ./S - x(2,:));
 
-Ngrowth = (P.b0(k)./S.^2) .*exp(-P.dG0(k)./S.^2) .*exp(-(S.^2)./(2*P.b0(k)*u)); 
+Ngrowth = b0_S2 .* e_G_S .*exp(-1 ./ (2*b0_S2.*u)); 
 
 
 xdot(1,:) = Ngrowth;
 
 xdot(2,:) = Rgrowth;
 
-%Cgrowth = P.F0(k)*(x(3,:) - P.Xp) .* (xdot(1,:).*x(2,:).^3 + 3*x(1,:).*x(2,:).^2 .*xdot(2,:)) ./ (1 - P.F0(k)* x(1,:).*x(2,:).^3);
-xdot(3,:) = (x(3,:) - P.Xp) .* F ./ (1-F) .* (3.*xdot(2,:)./x(2,:) + y );
-%xdot(3,:) = Cgrowth;
+xdot(3,:) = (x(3,:) - V(7)) .* F ./ (1-F) .* (3.*xdot(2,:)./x(2,:) + y );
+
 
 
 endfunction

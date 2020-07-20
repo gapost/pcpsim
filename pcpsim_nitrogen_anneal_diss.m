@@ -46,21 +46,23 @@ tf = zeros(N+1,1);
 C1(1) = P.Xc0;
 
 R1(1) = 1.05/P.S0(1);
-for k=1:N; 
+for k=13:N; 
 
-tf(1) = 0.01;
-t = logspace(log10(tf(k)), log10(k*480), 50);
+tf(13) = 0.01;
+t = logspace(log10(tf(k)), log10((k-12)*480), 100);
+%u = sqrt(t.*D(k)/P.a^2);
 u = t.*D(k)/P.a^2;
 
 uf(k) = u(end);
 tf(k+1) = t(end);
 
-V = [P.Xeqs(k) P.F0(k) P.S0(k) P.b0(k) P.dG0(k) P.a_R0(k) P.Xp];
-%ifunc = @(x,u) nuclea_coars(x,u,P);
-ifunc = @(x,u) nuclea_anneal(x,u,V);
-%ifunc = @(x,u) nuclea_coars_calder_anneal(x,u,P,k);
+R1(13) = 1.7026e+02; %163.9614;
+C1(13) = 3.4146e-04; %0.00030616; 
+N1(13) = 5.4044e-11;%7.7648e-11;
 
-N1(1) = -A*B*expint(B/u(1))+ A* exp(-B/u(1))*u(1);
+V = [P.Xeqs(k) P.F0(k) P.S0(k) P.b0(k) P.Xc0 P.a_R0(k) P.Xp N1(13)];
+
+ifunc = @(x2,u) dissolve_anneal_2(x2,u,V);
 
 frqT(1) = 1;
 for w=2:N; 
@@ -68,67 +70,39 @@ frqT(w) = Ta(w)/Ta(w-1);
 end
 
 tic
-x = lsode (ifunc, [N1(k) R1(k)*frqT(k) C1(k)], u); %1.05/P.S0(k)
+x2 = lsode (ifunc, [R1(k)*frqT(k)], u); 
 toc
 
-%[xdot, fcoars, S] = nuclea_coars(x',u,P);
-[xdot, F, S] = nuclea_anneal(x',u,V);
-%[xdot, fcoars, S] = nuclea_coars_calder_anneal(x',u,P,k);
+[xdot2, Xc, F] = dissolve_anneal_2(x2',u,V);
 
-N1(k+1) = x(end,1);
-C1(k+1) = x(end,3);
-R1(k+1) = x(end,2);
-S1(k) = S(end);
+R1(k+1) = x2(end,1);
+C1(k+1) = Xc(end);
 F1(k) = F(end);
 
 figure 1
-subplot(3,1,1)
-semilogy(t/60,x(:,2).*P.R0s(k),'o-')
+subplot(2,1,1)
+semilogy(t/60,x2(:,1).*P.R0s(k),'o-')
 hold on
 xlabel('t (min) ');
 ylabel('R (nm) ');
 
-subplot(3,1,2)
-plot(t/60,x(:,3),'.-')
+subplot(2,1,2)
+%plot(t/60,x2(:,2),'.-')
+plot(t/60,Xc,'.-')
 hold on
 xlabel('t (min)');
 ylabel('Solute mole fraction');
-
-subplot(3,1,3)
-plot(t/60,x(:,1)*N0*1e9,'.-')
-hold on
-xlabel('t (min)');
-ylabel('Density (\mu m^3)');
 end
-hold off
-hold off
-hold off
-
 figure 2
-subplot(5,1,1)
-semilogy(Ta,R1(2:end).*P.R0s,'.-')
-hold on
-semilogy(Ta,P.R0s./S1,'.-')
-hold off
+subplot(2,1,1)
+plot(Ta,R1(2:end).*P.R0s,'.-')
 xlabel('T (K) ');
 ylabel('R (nm) ');
 
-subplot(5,1,2)
+subplot(2,1,2)
 plot(Ta,C1(2:end)*1e6,'.-')
+##hold on
+##plot(Ta,P.Xeqs*1e6,'.-')
+##hold off
 xlabel('T (K) ');
 ylabel('Solute mole fraction (ppm)');
-
-subplot(5,1,3)
-plot(Ta,N1(2:end)*N0*1e9,'.-')
-xlabel('T (K)');
-ylabel('Density (\mu m^3)');
-
-subplot(5,1,4)
-semilogy(Ta,C1(2:end)./P.Xeqs,'.-')
-xlabel('T (K)');
-ylabel('C / C_{eq}');
-
-subplot(5,1,5)
-semilogy(Ta,F1,'.-')
-xlabel('T (K)');
-ylabel('Transformed volume fraction');
