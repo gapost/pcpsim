@@ -1,0 +1,125 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[square,numbers]{natbib}
+\bibliographystyle{unsrtnat}
+%\bibliographystyle{abbrvnat}
+\usepackage{hyperref}
+\author{AT, GA}
+\title{Nucleation, growth, coarsening equations}
+\begin{document}
+\maketitle
+
+\section{Intro}
+
+The formulas in this note have been collected from a number of papers \& books:
+\begin{itemize}
+\item \citet{Wagner-2005-HomogeneousSecond-P}, a comprehensive review of theory and experiments
+\item \citet{Russell-1980-Nucleationinsolids}, good explanation of nucleation
+\item \citet{Calderon-1994-Ostwaldripeningin}, growth and coarsening in concentrated alloys with second phase precipitate concentration $\neq 1$
+\item \citet{Deschamps-1998-Influenceofpredefo}, example application of theory to Al-Mg-Si
+\item \citet{Perez-2003-ID509}, example application to Fe-C
+\end{itemize}
+
+
+
+\section{Definitions}
+
+\begin{description}
+\item[$\alpha$] Solid solution phase
+\item[$\beta$] Precipitate phase
+\item[$C_0$] Average atomic solute concentration
+\item[$C_e^{\alpha,\beta}$] Equilibrium concentration in $\alpha$ or $\beta$ 
+\item[$C_\infty^{\alpha}$] Concentration in the $\alpha$ matrix (far from the precipitate)
+\item[$\hat{C}^{\alpha,\beta}$] Concentration in $\alpha$ or $\beta$ at the precipitate/matrix interface (modified by surface tension)
+\item[$N$] Number of precipitates per unit volume
+\item[$R$] Precipitate radius
+\item[$\gamma$] Surface energy (J/m$^2$)
+\item[$V_0$] Atomic volume
+\item[$a$] Lattice constant
+\item[$D$] Solute diffusion coefficient
+\item[$Z$] Zeldovitch factor, typically $Z\approx 1/20$
+\end{description}
+
+\section{Model Parameters}
+
+The value of $\gamma$ is mostly used as a model parameter to fit experimental data. From $\gamma$ the following central quantities can be obtained:
+
+\begin{equation}
+R_0 = \frac{2\gamma V_0}{k_B\,T}
+\end{equation}
+
+\begin{equation}
+\Delta G_0 = \frac{4}{3}\pi R_0^2 \gamma
+\end{equation}
+
+In one case \cite{Deschamps-1998-Influenceofpredefo} both the values of $\gamma$ and $\Delta G_0$ were used as fitting parameters. However the authors did not specify exactly how they did it. We assume that $R_0$ is calculated from $\gamma$ and $\Delta G_0$ is used in the calculation of free energy, $\Delta G^*$.
+
+\section{Nucleation}
+
+The ``driving force for nucleation'' is proportional to 
+\begin{equation}
+S = C_e^\beta \log \frac{C_\infty^\alpha}{C_e^\alpha} + (1-C_e^\beta) \log \frac{1-C_\infty^\alpha}{1-C_e^\alpha}
+\end{equation}
+
+The critical nucleation radius is 
+\begin{equation}
+R^* = R_0 / S
+\end{equation}
+and the associated free energy barrier
+\begin{equation}
+\Delta G^* = \Delta G_0 / S^2
+\end{equation}
+
+The nucleation rate is
+\begin{equation}
+\frac{dN}{dt} = \frac{1}{V_0} Z \beta^* 
+\exp \left( -\frac{\Delta G^*}{k_B T}\right) 
+\exp \left( -\frac{1}{2 Z \beta^* t}\right)
+\end{equation}
+where
+\begin{equation}
+\beta^* =\frac{4\pi R^{*2} D C_0}{a^4}
+\end{equation}
+
+
+\section{Growth}
+
+By solving the steady-state diffusion equation $\nabla^2 C(r)=0$ in the region around the precipitate the following equation is obtained
+\begin{equation}
+\frac{dR}{dt} = \frac{D}{R} \; \frac{C_\infty^\alpha-\hat{C}^\alpha}{\hat{C}^\beta-\hat{C}^\alpha}
+\end{equation}
+
+In the \textit{ideal solution} approximation the concentration at the interface is given by
+\begin{equation}
+\hat{C}^{\alpha,\beta} = C_e^{\alpha,\beta} \cdot \exp \left\lbrace \frac{R_0}{R} \frac{1-C_e^{\alpha,\beta}}{C_e^\beta - C_e^\alpha}\right\rbrace 
+\end{equation}
+
+When nucleation \& growth occur simultaneously the following term has to be added to $dR/dt$ to account for the arrival of new particles of radius $R^*$
+\begin{equation}
+\frac{dR}{dt} = -\frac{1}{N} \frac{dN}{dt}\; (\delta \cdot R^* - R)
+\end{equation}
+The factor $\delta\sim 1.05$ accounts for the fact that the radius of new nuclei is slightly higher than $R^*$. In numerical solutions the initial value of $R$ should be $R(t=0) = \delta \cdot R^*$ .
+
+\section{Coarsening}
+
+In the coarsening region the average radius grows as
+\begin{equation}
+R^3(t) = K\cdot t
+\end{equation}
+where $K$ is given in the \textit{ideal solution} approximation by
+\begin{equation}
+K\approx K_{\text{IS}} = \frac{4D R_0}{9}\;\frac{C_e^\alpha\, (1-C_e^\alpha)}{(C_e^\beta - C_e^\alpha )^2}
+\end{equation}
+Thus the time differential of $R$ is given by
+\begin{equation}
+\frac{dR}{dt} = \frac{4}{27}\;\frac{D R_0}{R^2}\;\frac{C_e^\alpha\, (1-C_e^\alpha)}{(C_e^\beta - C_e^\alpha )^2}
+\end{equation}
+
+\bibliography{pcpsim}
+
+\end{document}
