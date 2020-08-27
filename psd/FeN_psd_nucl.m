@@ -1,24 +1,17 @@
 % Calculate FeN nucleation & growth at one temperature
 clear
 
-% options
-Ta = 373; % ageing T (K)
-dt = 10*60; % ageing time in s
-gs = 0.062; %surface tension [J/m^2] 
-X0 = 8.8e-4; % Initial N concentration, Abiko
-incub=1; % Calc. incubation time for nucleation
-
-
 % Constants
 kb = 8.617e-5; %boltzmann constant [eV/K]
-afe = 0.286; % latrice parameter [nm]
+
+% annealing conditions
+Ta = 373; % ageing T (K)
+dt = 1e9; % ageing time in s
+
+% lattice data
+afe = 0.286; % lattice parameter [nm]
 Vat = afe^3/2; %Atomic volume of bcc iron [nm^3]
 rat = (3*Vat/4/pi)^(1/3); % atomic radius [nm]
-
-% time grid - sqrt(t)
-nt = 51;
-t = linspace(0,sqrt(dt),nt);
-t = t.^2;
 
 % N diffusion
 D0 = 1.26e-7; %Pre-exp. diffusion [m^2/s]
@@ -26,102 +19,106 @@ Qd = 0.76; %energy for diffusion [ev]
 D =D0*exp(-Qd./(kb*Ta))*1e+18; %diffusion coefficient [nm^2/s]
 gam = D/rat^2; 
 
-% alloy thermodynamics
+% alloy data
+gs = 0.062; %surface tension [J/m^2]
+X0 = 8.8e-4; % Initial N concentration, Abiko
 Xeq = 10.^(2.43 - 1840./Ta) *1e-2; % solubility
 Xp = 1/9; % precipitate
+
+% Options
+incub=1; % Calc. incubation time for nucleation
+dbg=1; % debug level (0: off, 1: messages, 2: msg+plots, 3: msg+more plots)
+
+% derived quantities
 gs *= 6.24150913; % convert to eV/nm2
 R0 = (2*gs*Vat)./(kb*Ta)/rat; 
-dG0 = (4/3)*pi*R0.^2*rat^2*gs/kb./Ta;
+dG0 = 0.5*R0^3;
 Z = 1/20;
 S0 = Xp*log(X0./Xeq)+(1-Xp)*log((1-X0)./(1-Xeq));
 Rc = R0./S0;
 b0 = 4*pi*R0.^2*Z*(rat/afe)^4;
 
-% R grid
-% find maximum radius
-zfunc = @(r) time2R(r,X0,Xp,Xeq,R0)-dt*gam;
-Rmax = fsolve(zfunc,2*Rc)
-% define log grid
-R = logspace(log10(0.8*Rc),log10(2*Rmax),51);
-dR = diff([0 R]);
-m = length(R);
-Rmid = zeros(size(R));
-R3 = zeros(size(R));
-Rmid(2:m) = (R(1:m-1)+R(2:m))/2;
-R3(2:m) = Rmid(2:m).*(R(1:m-1).^2+R(2:m).^2)/2;
+% log time grid - 10 pts per decade
+% t in s
+nt = (log10(dt)+1)*10 + 1;
+t = logspace(-1,log10(dt),nt);
 
+% R grid - R in units of rat
+% find maximum radius
+zfunc = @(r) time2R(abs(r),X0,Xp,Xeq,R0)-dt*gam;
+Rmax = sqrt(Rc^2 + 2*(X0-Xeq)/(Xp-Xeq)*dt*gam); % guess
+[Rmax, fval, info] = fsolve(zfunc,Rmax); % refine
+% log R grid
+R = logspace(log10(0.9*Rc),log10(Rmax/5),41);
+
+% initial values
 cutoff=1;
-dbg=0;
+f0 = zeros(size(R));
+
 % integrate the PDF
 tic
 [f, X, dfdt, cutoff] = ...
-  pdf_integ(zeros(1,m),X0,t*gam,Xp,Xeq,R,R0,dG0,b0,incub,cutoff,dbg);
+  psd_integ(f0,X0,t*gam,Xp,Xeq,R,R0,dG0,b0,incub,cutoff,dbg);
 toc
 
 % post-process
 S = Xp*log(X./Xeq)+(1-Xp)*log((1-X)./(1-Xeq));
 R1 = R0/Xp./log(X/Xeq);
-b = b0*X;
-tau = S.^2/2./b;
-Js = b./S.^2 .* exp(-dG0./S.^2);
+tau = S.^2./X/2/b0;
+Js = b0*X./S.^2 .* exp(-dG0./S.^2);
 if incub,
-  Js .*= exp(-tau/gam./t);
+  Js .*= exp(-tau./t/gam);
 end
 
-  
+% sums 
+dR = diff([0 R]);
+dR(1) = dR(2);
+dR2 = 0.5*diff([0 R.^2]);
+dR4 = 0.25*diff([0 R.^4]);
+ 
 Nt = (f*dR')';
-Rm = (f*(dR.*Rmid)')'./Nt;
-F = (f*(dR.*R3)')';
+Rm = (f*dR2')'./Nt;
+F = (f*dR4')';
 
 % plot
+
+figure 1
+clf
+
+subplot(3,2,1)
+loglog(t,Rm*rat,'.-',t,R1*rat,'.-')
+ylabel('R (nm) ');
+
+subplot(3,2,2)
+semilogx(t,[0 diff(Rm)./diff(t)*rat],'.-')
+ylabel('dR/dt (nm/s) ');
+
+subplot(3,2,3)
+loglog(t,X/Xeq-1,'.-')
+ylabel('X / X_{eq} - 1');
+
+subplot(3,2,4)
+semilogx(t,F,'.-')
+ylabel('Transformed volume fraction ');
+
+subplot(3,2,5)
+semilogx(t,Nt,'.-')
+xlabel('t (s)) ');
+ylabel('Clusters per atom');
+
+subplot(3,2,6)
+semilogx(t,Js*gam,'.-')
+xlabel('t (s) ');
+ylabel('Jn (s^{-1})');
 
 figure 2
 clf
 
-z = sqrt(t);
+idx=41:10:101;
+lbls = {};
+for k=1:length(idx),
+  lbls = [lbls num2str(t(idx(k)),2)];
+endfor
 
-subplot(3,2,1)
-plot(z,Rm*rat,'.-',z,R1*rat,'.-')
-ylabel('R (nm) ');
-
-subplot(3,2,2)
-plot(z,[0 diff(Rm)./diff(t)*rat],'.-')
-ylabel('dR/dt (nm/s) ');
-
-subplot(3,2,3)
-plot(z,X,'.-')
-ylabel('Solute mole fraction');
-
-subplot(3,2,4)
-plot(z,F,'.-')
-ylabel('Transformed volume fraction ');
-
-subplot(3,2,5)
-plot(z,Nt,'.-')
-xlabel('t^{1/2} (s^{1/2}) ');
-ylabel('Clusters per atom');
-
-subplot(3,2,6)
-plot(z,Js*gam,'.-')
-xlabel('t^{1/2} (s^{1/2}) ');
-ylabel('Jn (s^{-1})');
-
-figure 3
-clf
-subplot(2,1,1)
-semilogx(R*rat,f(end,:).*dR,'.-')
-title('PDF')
-ylabel('f\cdot \Delta R')
-hold on
-yy=get(gca,'ylim');
-semilogx([1 1]*R(cutoff)*rat,[yy(1) 0.9*yy(2)],'k--')
-hold off
-subplot(2,1,2)
-semilogx(R*rat,dfdt(end,:).*dR,'.-')
-hold on
-yy=get(gca,'ylim');
-semilogx([1 1]*R(cutoff)*rat,[yy(1)*1.1 0.9*yy(2)],'k--')
-hold off
-xlabel('R (nm)')
-ylabel('df/dt \Delta R')
+plot_psd
 
