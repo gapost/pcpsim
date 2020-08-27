@@ -76,7 +76,7 @@ with
 S =  X_p \ln\frac{X}{X_{eq}} + (1 - X_p) \ln\frac{1 - X}{1-X_{eq}} 
 \end{equation}
 where $V_{at}$ is the atomic volume (considered as constant for all species, $V_{at}=a^3/2$ for a bcc structure with lattice parameter $a$), $S$ is a thermodynamical function giving the driving force for nucleation (based
-on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the solute mole fraction in the precipitate, and $X$ the current solute mole fraction of the matrix.
+on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the solute mole fraction in the precipitate, and $X$ the current solute mole fraction of the matrix. The above relation has been derived by \citet{Aaronson-1970-Thevolumefreeener}.
 
 The nucleation rate is:
 \begin{equation}
@@ -147,7 +147,7 @@ where the following definitions have been made
 \begin{align}
 R_0 &= \frac{2\gamma V_{at}}{r_{at}kT} \\ 
 \beta_0 &= 4\pi R_0^2 Z r_{at}^4/ a^4 \\
-\Delta G_0 &= \frac{4\pi R_0^2 r_{at}^2\gamma }{3kT}  \\
+\Delta G_0 &= R_0^3/2  \\
 X_R &= X_{eq} \exp 
 \left( \frac{R_0}{R} \frac{1-X_{eq}}{X_p - X_{eq}}\right) \\
 F &= R'^3 N
@@ -156,9 +156,9 @@ F &= R'^3 N
 
 In the following we will omit the prime from $t'$ and $R'$.
 
-\section{Numerical evolution of the precipitate distribution function (PDF)}
+\section{Numerical evolution of the precipitate size distribution (PSD)}
 
-In this type of modelling, first discussed by Kampmann \& Wagner (see \citet{Wagner-2005-HomogeneousSecond-P}, the ``N-modell'',) we consider the evolution of the precipitate distribution function with respect to radius, $f(R,t)$. The distribution satisfies the equation of continuity:
+In this type of modelling, first discussed by Kampmann \& Wagner (see \citet{Wagner-2005-HomogeneousSecond-P}, the ``N-modell'',) we consider the evolution of the precipitate distribution function with respect to radius, $f(R,t)$. The PSD satisfies the equation of continuity:
 \begin{equation}
 \label{continuity}
 \frac{\partial f}{\partial t} + \frac{\partial }{\partial R} (f \cdot v_R) = J_s \cdot \delta(R - \alpha R^*)
@@ -172,63 +172,82 @@ f_{ik} = \frac{1}{\Delta R_k} \int_{R_{k-1}}^{R_k}f(R,t_i)\,dR
 and the discretized PDE becomes
 \begin{equation}
 \label{PDE}
-\frac{f_{i+1,k} - f_{ik}}{\Delta t_i} + \frac{J_{ik} - J_{i,k-1}}{\Delta R_k} = \frac{J_s}{\Delta R_{k^*}} \delta_{k,k*}
+\frac{f_{i+1,k} - f_{ik}}{\Delta t_i} = - \frac{J_{ik} - J_{i,k-1}}{\Delta R_k} + \frac{J_s}{\Delta R_{k^*+1}} \delta_{k,k^*+1}
 \end{equation}
 where the precipitate ``current'' $J_{ik}$ is given by
 \begin{equation} 
 J_{ik} = 
 \begin{cases}
-f_{ik}v_k & v_k>0 \\
--f_{i,k+1}v_k & v_k<0
+f_{ik}v_k & v_k \geq 0 \\
+f_{i,k+1}v_k & v_k<0
 \end{cases}
 \end{equation}
-The index $k^*$ corresponds to the spatial grid point where $R_{k^*} \leq \alpha R^* < R_{k^*+1}$. 
+The above finite difference scheme has been introduced by \citet{Myhr-2000-Modellingofnon-iso} for this type of calculation and corresponds to ``\textit{upwind differencing}'' used in CFD (see Press et al. ``Numerical Recipes'', ch. 20).
 
-The above finite difference scheme is taken from \citet{Myhr-2000-Modellingofnon-iso} and corresponds to ``\textit{upwind differencing}'' used in CFD (see Press et al. ``Numerical Recipes'', ch. 20).
+The index $k^*$ corresponds to the spatial grid point where $R_{k^*-1} \leq  R^* < R_{k^*}$. The generated nuclei are added to $f_{i,k^*+1}$ so that all of them survive and grow. \footnote{If the generated nuclei where added to $f_{i,k^*}$ a fraction of them would dissolve since $v_{k^*-1}<0.$ }
 
-The total precipitate concentration, average radius and volume fraction can be obtained from the distribution by the following relations:
+The total precipitate concentration, average radius and volume fraction can be obtained from $f_{i,k}$ by the following relations:
 \begin{subequations}
 	\begin{align}
-N_i &= \sum_k { f_{i,k} \Delta R_k } \\
-\bar{R}_i &= (1/ N_i) \sum_k { f_{i,k} R_k \Delta R_k }  \\
-F_i &= (1/ 4) \sum_k { f_{i,k} (R_k^4-R_{k-1}^4 )  } 
+N_i &= \int_0^\infty f(R,t_i) dR 
+\approx \sum_k { f_{i,k} \Delta R_k } \\
+\bar{R}_i &= \frac{1}{N_i}\int_0^\infty f(R,t_i) R dR
+\approx \frac{1}{2 N_i}\sum_k { f_{i,k} (R_k^2-R_{k-1}^2 ) }  \\
+F_i &= \frac{4\pi}{3V_{at}} \int_0^\infty f(R,t_i) R^3 dR
+\approx \frac{1}{4} \sum_k { f_{i,k} (R_k^4-R_{k-1}^4 )  } 
 	\end{align}
 \end{subequations}
 
 
 \subsection{Numerical integration}
 
-A static logarithmic grid is selected for the $R$-space discretization. $\Delta R_k / R_k$ is constant (typically $\sim 0.05$.) The first point is positioned at or just below $R^*$ and the last point should be higher than the largest expected $R$. 
-
-From \eqref{PDE} it is evident that $f_{i+1,k}$ can be calculated from $f_{ik}$ after deciding the time step $\Delta t_i$. This is selected so that
-\begin{equation}
-v_k  \Delta t_i < \Delta R_k/2, \quad \forall k
-\end{equation}
-This is the well-known \textit{Courant condition} which ensures the stability of the numerical solution (again see Press et al. ``Numerical Recipes'', ch. 20). Essentially it means that in one time-step nuclei from one distribution bin can move only to adjacent bins and not further away. To satisfy the above condition the time interval is set by
-\begin{equation}
-\Delta t_i = 0.5 \min \left\lbrace  | \Delta R_k / v_k | \right\rbrace 
-\end{equation}
-
-If the simulation extends beyond the nucleation stage and the average $R$ has evolved well above $R*$, the  nuclei concentration close to $R^*$ becomes very low and thus the first few bins of the distribution can be neglected. Thus we define a lower cut-off index $k_c$ and set $f=0$ for $R<R_{k_c}$. The grid points below $k_c$ are then not considered when selecting  $\Delta t_i$. This speeds-up significantly the integration in the growth phase. As can be seen from the last equation, for a logarithmic grid we have  $\Delta R_k / v_k \sim 0.05 R_k / v_k $ which becomes very small as $R_k \to R^*$. Neglecting the grid points near to $R^*$ allows for much larger $\Delta t$ values in the growth regime.
-
-The cut-off index $k_c$ is initially set to the 1st grid point and then it is advanced by one each time the concentration in the 1st bin above cut-off, $f_{i,k_c+1}\cdot \Delta R_{k_c+1}$, falls below a certain threshold $N_{min}$. A reasonable threshold could be 1 nucleus per cm$^3$ or, equivalently, $N_{min}\sim 10^{-23}$. This means that effectively when the concentration in the first bin above $k_c$ falls below $N_{min}$, it is zeroed-out and becomes inactive. 
-
-To account also for nuclei dissolution, where the distribution will move gradually towards smaller $R$, we have to allow $k_c$ to go down again, i.e., to reactivate gradually the lower bins of the distribution. For this we check the concentration $\delta N_c$ of nuclei that would move from bin $k_c+1$ towards $k_c$ during a time-step. This is equal to 
+A static logarithmic grid is selected for the $R$-space discretization with constant $\Delta R_k / R_k$ (typically $\sim 0.05$.) The first point is typically positioned just below $R^*$ and the last point should be higher than the largest anticipated radius $R_{\max}$ for the simulation period. To obtain an estimate of $R_{\max}$ we define the function $\tau(R)$
 \[
-\delta N_c = v_{k_c} f_{i,k_c+1} \Delta t_i
+\tau(R) = \int_{R^*}^{R}{\frac{dR}{v_R}}
+\] 
+where the initial solute concentration $X_0$ is employed in the evaluation of $v_R$. This function corresponds to the time needed for a precipitate to grow to radius $R$. Then $R_{\max}$ is found by solving numerically the equation $\tau(R_{\max}) = t_s$, where $t_s$ the total simulation time.
+
+The PSD is initialized either to zero or to some initial precipitation state obtained either from experiment or other simulation.
+
+The evolution of the PSD is done iteratively with the following steps:
+\begin{enumerate}
+\item Calculate the current volume fraction $F_i$ and matrix concentration $X$
+\item Calculate the nucleation rate $J_s$ and the bin index $k^*$ where the generated nuclei are to be inserted.
+\item Calculate the right side of eq. \eqref{PDE}.
+\item Adaptively decide the time step $\Delta t_i$ (see below)
+\item Advance the PSD to $f_{i+1,k}$ and simulation time
+\item Repeat until the total simulation time is reached 
+\end{enumerate}
+
+\subsubsection{Adaptive time step selection}
+$\Delta t_i$ is selected according to 2 criteria.
+
+First, an upper limit is set by the following relation
+\begin{equation}
+v_k  \Delta t_i < \Delta R_k, \quad \forall k
+\end{equation}
+This is the well-known \textit{Courant condition} which ensures the stability of the PDE numerical solution (again see Press et al. ``Numerical Recipes'', ch. 20). Essentially it means that in one time-step nuclei from one distribution bin can move only to adjacent bins and not further away. Thus the time interval is initially set by
+\begin{equation}
+\Delta t_i = \min \left\lbrace  | \Delta R_k / v_k | \right\rbrace 
+\end{equation}
+
+A second criterion is set by the requirement that $R^*$, which is a critical simulation parameter, does not change appreciably during a time step. Typically we require that $\Delta R^* / R^* < 0.01$. To implement this, $f_{i+1,k}$ and the new $R^*$ must first be calculated with the current value of $\Delta t_i$; if the change of $R^*$ is too large the time step is halved and $f_{i+1,k}$ is recalculated. The process is repeated until the criterion is fulfilled. 
+
+\subsubsection{Lower cut-off radius} 
+
+A drawback of the method is that the time step is bounded by the smallest $\Delta R_k / v_k$ which occurs at the lower $R$ bins. However, as the simulation advances and the average radius becomes larger, the concentration in the first few bins becomes very low and can be neglected. Thus we define a lower cut-off index $k_c$ and set $f=0$ for $R<R_{k_c}$. The grid points below $k_c$ are not considered when selecting  $\Delta t_i$ and this allows for much more efficient simulation in the growth phase. 
+
+The cut-off index $k_c$ is initially set to the 1st grid point and then it is advanced by one each time the concentration in the 1st bin above cut-off, $f_{i,k_c+1}\cdot \Delta R_{k_c+1}$, falls below a certain threshold $N_{min}$. A reasonable threshold could be 1 nucleus per cm$^3$ or, equivalently, $N_{min}\sim 10^{-23}$. This means that effectively when the concentration in the first bin above $k_c$ falls below $N_{min}$, the bin is zeroed-out and becomes inactive. 
+
+When nuclei dissolution occurs the distribution will move gradually towards smaller $R$ and we have to allow $k_c$ to go down again, i.e., to gradually reactivate the lower bins of the distribution. For this we check the concentration $\delta N_c$ of nuclei that would move from bin $k_c+1$ towards $k_c$ during a time-step. This is equal to 
+\[
+\delta N_c = |v_{k_c}| f_{i,k_c+1} \Delta t_i
 \] 
 If $\delta N_c$ becomes larger than a threshold then the cut-off index $k_c$ is decreased by one. This threshold is selected as
 \begin{equation}
 \delta N_c \geq N_{min} + \epsilon N
 \end{equation}
-where $N = \sum_k {f_{i,k} \Delta R_k}$ is the total concentration of nuclei and $\epsilon$ a small number (typically $10^{-3}$).
-
-
-
-
-
-
-
+where $N = \sum_k {f_{i,k} \Delta R_k}$ is the total concentration of nuclei and $\epsilon$ a small number (typically $10^{-3}$ or $10^{-4}$). Here the relative term $\epsilon N$ is used to raise the threshold, otherwise the lower cut-off will extend to very small $R$ and the simulation will become significantly slower. 
 
 \bibliographystyle{plainnat}
 \bibliography{pcpsim}
