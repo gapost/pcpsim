@@ -24,10 +24,14 @@ D =D0*exp(-Qd./(kb*Ta))*1e+18; %diffusion coefficient [nm^2/s]
 gam = D/rat^2;
 
 % alloy data
-gs = 0.062; %surface tension [J/m^2]
+gs = 0.057; %surface tension [J/m^2]
 X0 = 4.67e-4; % Nominal N concentration
 Xeq = 10.^(2.43 - 1840./Ta) *1e-2; % solubility
 Xp = 1/9; % precipitate
+
+% Options
+incub=1; % Calc. incubation time for nucleation
+dbg=0; % debug level (0: off, 1: messages, 2: msg+plots, 3: msg+more plots)
 
 % derived quantities
 gs *= 6.24150913; % convert to eV/nm2
@@ -43,7 +47,7 @@ t = 0:20:dt;
 nt = length(t);
 
 % log R grid 0.5 - 100 nm, in units of rat
-R = logspace(log10(0.5/rat),log10(100/rat),101); 
+R = logspace(log10(0.5/rat),log10(120/rat),101); 
 
 
 m = length(R);
@@ -53,22 +57,19 @@ dR4 = 0.25*diff([0 R.^4]);
 
 f = zeros(nTa,m);
 dfdt = zeros(nTa,m);
+cutoff=1;
 
-Nt_t = ones(1,nTa*(nt))*NaN;
-F_t = ones(1,nTa*(nt))*NaN;
-X_t = ones(1,nTa*(nt))*NaN;
-Rm_t = ones(1,nTa*(nt))*NaN;
-R1_t = ones(1,nTa*(nt))*NaN;
+Nt_t = ones(1,nTa*nt)*NaN;
+F_t = ones(1,nTa*nt)*NaN;
+X_t = ones(1,nTa*nt)*NaN;
+Rm_t = ones(1,nTa*nt)*NaN;
+R1_t = ones(1,nTa*nt)*NaN;
 
 k = 1;
-dk = (t(2)-t(1))/60;
-cutoff=1;
-dbg=1;
-incub=0; % incubation time off
-
-
 
 for i=1:nTa
+
+  clear fi dfdti Xi
   
   if i==1,
     fi = zeros(1,m); 
@@ -80,51 +81,30 @@ for i=1:nTa
   
   
   tic
-  [f_t,X_,dfdt_t,cutoff] = ...
+  [fi,Xi,dfdti,cutoff,iter] = ...
   psd_integ(fi,Xi,t*gam(i),Xp,Xeq(i),R,R0(i),dG0(i),b0(i),incub,cutoff,dbg);
   cput = toc();
   
+  
   disp(['Ta = ' num2str(Ta(i),'%.1f') ...
   ', cpu = '  num2str(cput,3) ...
+  ', iter = '  num2str(iter) ...
   ', cutoff = ' num2str(cutoff)]);
   
-  f(i,:) = f_t(end,:);
-  dfdt(i,:) = dfdt_t(end,:);
-  X(i) = X_(end);
+  f(i,:) = fi(end,:);
+  dfdt(i,:) = dfdti(end,:);
+  X(i) = Xi(end);
   
   
   for j=2:nt, 
-    Nt_t(k) = (f_t(j,:)*dR')';
-    F_t(k) = (f_t(j,:)*dR4')';
-    Rm_t(k) = (f_t(j,:)*dR2')'./Nt_t(k);
-    X_t(k) = X_(j);
-    R1_t(k) = R0(i)/Xp./log(X_t(k)./Xeq(i));
-    k += 1;   
+    k += 1; 
+    Nt_t(k) = (fi(j,:)*dR')';
+    F_t(k) = (fi(j,:)*dR4')';
+    Rm_t(k) = (fi(j,:)*dR2')'./Nt_t(k);
+    X_t(k) = Xi(j);
+    R1_t(k) = R0(i)/Xp./log(Xi(j)./Xeq(i));    
   end
   
-  figure 3
-  x = (1:k)*dk;
-  subplot(2,2,1)
-  plot(x,Rm_t(1:k)*rat,'.-')
-  title('Rm, R* (nm)')
-  subplot(2,2,2)
-  plot(x,X_t(1:k),'.-')
-  title('X')
-  subplot(2,2,3)
-  plot(x,Nt_t(1:k),'.-')
-  title('Ntot')
-  xlabel('t (min)')
-  subplot(2,2,4)
-  plot(x,F_t(1:k),'.-')
-  title('F')
-  xlabel('t (min)')
-  
-  figure 4
-  idx = i;
-  plot_psd
-  
-  drawnow  
-   
 end
 
 Nt = (f*dR')';
@@ -157,6 +137,28 @@ figure 2
 clf
 idx=3:length(Ta);
 plot_psd
+
+figure 3
+clf
+x = (1:nt*nTa)*(t(2)-t(1))/60; % continous annealing time
+subplot(2,2,1)
+plot(x,Rm_t*rat,'.-')
+title('Rm, R* (nm)')
+subplot(2,2,2)
+plot(x,X_t,'.-')
+title('X')
+subplot(2,2,3)
+plot(x,Nt_t,'.-')
+title('Ntot')
+xlabel('t (min)')
+subplot(2,2,4)
+plot(x,F_t,'.-')
+title('F')
+xlabel('t (min)')
+
+##A = [Ta' X' F' Nt' Rm'*rat];
+##save -ascii FeN57.dat A 
+
 
 
 

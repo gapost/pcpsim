@@ -1,4 +1,4 @@
-function [f, X, dfdt, cutoff] = psd_integ(f0,X0,t,Xp,Xeq,R,R0,dG0,b0,incub,...
+function [f, X, dfdt, cutoff, total_iter] = psd_integ(f0,X0,t,Xp,Xeq,R,R0,dG0,b0,incub,...
   cutoff0,dbg)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [f, X, dfdt, cutoff] = pdf_integ(f0,X0,t,Xp,Xeq,R,R0,dG0,b0,incub,...
@@ -49,10 +49,13 @@ function [f, X, dfdt, cutoff] = psd_integ(f0,X0,t,Xp,Xeq,R,R0,dG0,b0,incub,...
     printf('step  \titer  \tkc     \tX/Xeq-1  \tF      \tN      \n');
   end
   
+  total_iter = 0;
   
   for i=2:nt,
     [f(i,:) X(i) dfdt(i,:) cutoff iter] = psd_step(f(i-1,:),X(i-1),[t(i-1) t(i)],...
                                  Xr,Xp,Xeq,R0,dG0,R,dR,R3,b0,incub,cutoff,dbg);
+                                 
+    total_iter += iter;
                                  
     if dbg>0,
       printf('%d/%d\t%d\t%d\t%f\t%f\t%e\n',...
