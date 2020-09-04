@@ -10,7 +10,7 @@ Ta = [295 307.80 320.55 333.85 347.70  ...
       362.10 377.10 392.75 409.05 426.00 443.65 462.05 ...
      481 500 520];
 nTa = length(Ta);
-dt = 8*60; % annealing time in s
+dt = 5*60; % annealing time in s
 
 % lattice data
 afe = 0.286; % lattice parameter [nm]
@@ -24,7 +24,7 @@ D =D0*exp(-Qd./(kb*Ta))*1e+18; %diffusion coefficient [nm^2/s]
 gam = D/rat^2;
 
 % alloy data
-gs = 0.057; %surface tension [J/m^2]
+gs = 0.0555; %surface tension [J/m^2]
 X0 = 4.67e-4; % Nominal N concentration
 Xeq = 10.^(2.43 - 1840./Ta) *1e-2; % solubility
 Xp = 1/9; % precipitate
@@ -156,8 +156,8 @@ plot(x,F_t,'.-')
 title('F')
 xlabel('t (min)')
 
-##A = [Ta' X' F' Nt' Rm'*rat];
-##save -ascii FeN57.dat A 
+A = [Ta' X' F' Nt' Rm'*rat];
+save -ascii FeN555.dat A 
 
 
 

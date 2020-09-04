@@ -8,7 +8,7 @@ TaI6 = A(:,5);
 RI6 = A(:,3); 
 RRI6 = (RI6)./(RI6(1))*100;
 
-A = load('FeN57.dat');
+A = load('FeN555.dat');
 Ta = A(:,1);
 X = A(:,2); X0 = A(1,2);
 F = A(:,3); Xp = 1/9;
@@ -35,5 +35,5 @@ title('Experimental vs Model')
 xlabel('Ta (K)')
 ylabel('R/R_0 & C/C_0(%)')
 legend('Un - Irrad (exp)','Irra8-2nd (exp) ',  
-  '\gamma = 0.057 J/m^2, \rho_p / \rho_m = 0.4',...
+  '\gamma = 0.0555 J/m^2, \rho_p / \rho_m = 0.4',...
   'location', 'southwest' )
