@@ -10,7 +10,7 @@ A = load('tetsu.csv');
 t_te = A(:,1);
 R_te = A(:,2);
 
-A = load('../tvsX.dat');
+A = load('tvsX.dat');
 t_sim = A(:,1);
 X_sim = A(:,2);
 
