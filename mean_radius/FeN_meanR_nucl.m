@@ -1,4 +1,5 @@
-% Calculate FeN nucleation & growth at one temperature
+% Calculate FeN nucleation & growth 373 K
+% by mean R equations
 clear
 
 % Constants

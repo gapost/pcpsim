@@ -1,4 +1,4 @@
-%% Calculate Fe-N annealing with PSD evolution
+%% Calculate Fe-N annealing with mean radius equations
 clear
 
 % Constants
@@ -44,7 +44,7 @@ b0 = 4*pi*R0.^2*Z*(rat/afe)^4;
 
 % time grid for each annealing T (step = 20 s) 
 t = 0:20:dt; 
-%t=logspace(-1,log10(dt),101);
+
 nt = length(t);
 
 sol = zeros(nTa,6);

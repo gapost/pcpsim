@@ -1,4 +1,27 @@
 function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
+%
+% Define the ODEs describing mean precipitate radius during nucleation and
+% growth 
+%
+% Input:
+%  x(1,3)  : ODE variables, 
+%            x(1): precipitate atomic concentration, 
+%            x(2): mean radius (in units of rat), 
+%            x(3): atomic concentration of solute in matrix
+%  t       : time (D*t/rat^2) 
+%  Xp, Xeq : solute conc. in the precipitate and in the matrix at equilibrium
+%  R0,dG0,b0 : nucleation & growth physical parameters
+%  incub   : if 1 then incubation time is calculated
+%  dbg     : if 1 turn on debugging
+%
+% Output
+%   xdot   : dx/dt
+%   F      : precipitate volume fraction
+%   S      : nucleation entropy
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
   N = x(1); R = x(2); X = x(3);
   if N<0,

@@ -1,4 +1,5 @@
-% Calculate FeN nucleation & growth at one temperature
+% Calculate nucleation & growth of metastable iron carbide (Fe3C) in Fe-C alloy
+% by the mean radius method
 clear
 
 % Constants
@@ -14,7 +15,7 @@ afe = 0.286; % lattice parameter [nm]
 Vat = afe^3/2; %Atomic volume of bcc iron [nm^3]
 rat = (3*Vat/4/pi)^(1/3); % atomic radius [nm]
 
-% C diffusion
+% C diffusion in Fe
 D0 = 6.2e-7; %Pre-exp. diffusion [m^2/s]
 Qd = 80000; %energy for diffusion [J/mol]
 D =D0*exp(-Qd/(Rgas*Ta))*1e+18; %diffusion coefficient [nm^2/s]
@@ -24,7 +25,7 @@ gam = D/rat^2;
 gs = 0.174; %surface tension [J/m^2]
 X0 = 7e-4; % Initial C concentration
 Xeq = 0.01*exp(-28400/(Rgas*Ta)); 
-Xp = 1/4; % precipitate
+Xp = 1/4; % precipitate carbon concentration
 
 % Options
 incub=1; % Calc. incubation time for nucleation
