@@ -52,6 +52,13 @@
   A. Theodorou\\
   \texttt{theoda@ipta.demokritos.gr}
 }
+\author{
+  A. Theodorou\\
+  \texttt{theoda@ipta.demokritos.gr}
+  \and
+  G. Apostolopoulos\\
+  \texttt{gapost@ipta.demokritos.gr}
+}
 \date{June 2020}
 \title{\texttt{pcpsim} \\ 
 MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
@@ -65,7 +72,9 @@ MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
 The model for homogeneous isothermal precipitation is partly based on the model by Langer and Schwartz, as modified by Kampmann and Wagner (MLS model) and describes the nucleation and growth of  precipitates from a solid solution.
 
 
-\section{Classical Theory of Nucleation and Growth}
+\section{Theoretical background}
+
+\subsection{Nucleation}
 
 As a first step we need to define the driving force for precipitation at any given time of the aging process: 
 \begin{equation}
@@ -80,7 +89,7 @@ on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equi
 
 The nucleation rate is:
 \begin{equation}
-\label{P_density}
+\label{eq:nucleation}
 J_s = \frac{d N}{d t} = Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{t_i}{t})
 \end{equation}
 where $N$ is the number of nuclei per atomic site, $Z$ is the Zeldovich factor ($\approx$ 1/20) and $t_i$ is the incubation time. The other parameters of equation are expressed as follows:
@@ -95,25 +104,60 @@ t_i &= \frac{1}{2\beta^* Z}
 \end{subequations}
 where $R^*$ and $\Delta G^*$ are the critical nucleation radius and free energy, respectively, $\gamma$ is the matrix/precipitate interfacial energy and $D$ is the diffusion coefficient of solute atoms in the matrix.
 
-The precipitate size increase during a time increment $dt$ is then calculated as:
-\begin{equation}
-\label{P_radius}
-\frac{dR}{dt} = \frac{D}{R} \cdot \frac{X - X_R}{X_p - X_R} + \frac{1}{N}\frac{dN}{dt} \cdot (\alpha R^* - R)
-\end{equation}
 
-The first term on the left hand side of \eqref{P_radius} corresponds to the growth of existing precipitates (including the Gibbs-Thomson effect). $X_R$ represent the matrix solute concentration at the interface ($r=R$) as modified by surface tension according to the Gibbs-Thomson effect. For an ideal solution $X_R$ is given by \citep{Wagner-2005-HomogeneousSecond-P,Calderon-1994-Ostwaldripeningin}:
+\subsection{Growth}
+
+A precipitate with $R>R^*$ grows by incorporating solute atoms from the surrounding matrix. Thus there is a flow of solute atoms from the matrix towards the precipitate surface. It is assumed that a steady-state is reached where there is a constant gradient of the solute concentration around the precipitate $X(r)$ that supports the solute flow $J = -D\,dX/dr |_{r=R}$, where $D$ is the diffusion constant of solute atoms in the matrix.
+
+By solving the steady-state diffusion equation $\nabla^2 X(r)=0$ in the region around the precipitate the following equation is obtained
+\begin{equation}
+\frac{dR}{dt} = \frac{D}{R} \; \frac{X-X_R}{X_p-X_R}
+\label{eq:growth}
+\end{equation}
+where $X_R$ is the solute concentration at the matrix/precipitate interface.
+$X_R$ should be equal to the equilibrium concentration as modified by the Gibbs-Thomson effect (surface tension). In the \textit{ideal solution} approximation $X_R$ is given by \citep{Calderon-1994-Ostwaldripeningin}:
 \begin{equation}
 X_R =  X_{eq} \cdot \exp \left( \frac{2\gamma V_{at}}{kT\, R} \frac{1-X_{eq}}{X_p - X_{eq}}\right) 
 \end{equation}
 
-The second term of \eqref{P_radius} is due to the appearance of new nuclei of
-size $\alpha R^*$. The numerical factor $\alpha = 1.05$ results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size. 
+\subsection{Coarsening}
 
-Finally, the coupling between the precipitation density and their mean radius is made through the solute balance:
+When the system reaches the coarsening region the average precipitate radius grows as
+\begin{equation}
+R^3(t) = K\cdot t
+\end{equation}
+where $K$ is given in the \textit{ideal solution} approximation by \citep{Calderon-1994-Ostwaldripeningin}
+\begin{equation}
+K\approx K_{\text{IS}} = \frac{8}{9}\frac{D \gamma V_{at}}{kT}\;
+\frac{X_{eq}\, (1-X_{eq})}{(X_p - X_{eq} )^2}
+\end{equation}
+Thus the time differential of $R$ is given by
+\begin{equation}
+\frac{dR}{dt} = \frac{8}{27}\;
+\frac{D \gamma V_{at}}{kT\,R^2}\;
+\frac{X_{eq}\, (1-X_{eq})}{(X_p - X_{eq} )^2}
+\end{equation}
+
+\section{Nucleation \& Growth equations for the mean precipitate radius}
+
+In many cases we may ignore the precipitate size distribution and consider only the mean radius $\bar{R}$.
+
+In this approximation the mean radius grows according to \eqref{eq:growth} while new precipitates of radius $R^*$ nucleate at a rate given by \eqref{eq:nucleation}. Thus the mean radius evolves as 
+\begin{equation}
+\label{P_radius}
+\frac{d\bar{R}}{dt} = \frac{D}{\bar{R}} \cdot \frac{X - X_R}{X_p - X_R} - \frac{1}{N}\frac{dN}{dt} \cdot (\bar{R} - \alpha R^*)
+\end{equation}
+where the 2nd term expresses the reduction rate of $\bar{R}$ due to the nucleation of new critical nuclei. $\alpha$ is a value just above 1 (e.g. 1.05) which results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size.
+
+As precipitates grow they consume solute atoms and thus the matrix concentration $X$ will be reduced from the initial $X_0$. The solute balance can be expressed as:
 \begin{equation}
 X_0 = X\,(1-F) + X_p\,F
 \end{equation}
-where $F=\frac{4}{3}\pi R^3 N$ is the precipitate volume fraction.
+where $F=\frac{4}{3}\pi R^3 N$ is the precipitate volume fraction. The derivative of $X$ can be obtained from the last equation:
+\begin{equation}
+\frac{dX}{dt} = -(X_p - X)\, \frac{F}{1-F} \,
+\left[ 3\frac{\dot{R}}{R} + \frac{\dot{N}}{N} \right]
+\end{equation}  
 
 \subsection{Dimensionless formulation}
 Now the following dimensionless variables are defined that are easier to use for programming:
@@ -123,9 +167,11 @@ t' &= \frac{D\cdot t}{r_{at}^2} \\
 R' &= R / r_{at}
 	\end{align}
 \end{subequations}
+where $r_{at} = (3V_{at}/4\pi)^{1/3}$ is the atomic radius.
 
-The equations (\ref{P_density}), (\ref{P_radius}) plus the differential of the solute balance constitute a system of differential equation for $N$, $R'$ and $X$, which is rewritten here in terms of dimensionless variables:
+The equations (\ref{eq:nucleation}), (\ref{P_radius}) plus the differential of the solute balance constitute a system of ordinary differential equations (ODEs) for $N$, $R'$ and $X$, which is rewritten here in terms of dimensionless variables:
 \begin{subequations}
+\label{eq:ngode}
 \begin{align}
 \frac{dN}{dt'} &= 
 \frac{\beta_0 X}{S^2} 
@@ -147,14 +193,32 @@ where the following definitions have been made
 \begin{align}
 R_0 &= \frac{2\gamma V_{at}}{r_{at}kT} \\ 
 \beta_0 &= 4\pi R_0^2 Z r_{at}^4/ a^4 \\
-\Delta G_0 &= R_0^3/2  \\
+\Delta G_0 &= R_0^3/2  
+\end{align}
+\end{subequations}
+
+Additionally the following hold
+\begin{subequations}
+\begin{align}
 X_R &= X_{eq} \exp 
-\left( \frac{R_0}{R} \frac{1-X_{eq}}{X_p - X_{eq}}\right) \\
+\left( \frac{R_0}{R'} \frac{1-X_{eq}}{X_p - X_{eq}}\right) \\
 F &= R'^3 N
 \end{align}
 \end{subequations}
 
 In the following we will omit the prime from $t'$ and $R'$.
+
+\subsection{Implementation in \texttt{OCTAVE}}
+
+The function file \texttt{mean\_radius/mean\_radius\_ng.m} defines the ODE system of \eqref{eq:ngode} so that it can be used in \texttt{MATLAB/OCTAVE} ODE solvers.
+
+The content is listed below: 
+
+\lstinputlisting{../mean_radius/mean_radius_ng.m}
+
+\subsection{Example calculation}
+
+
 
 \section{Numerical evolution of the precipitate size distribution (PSD)}
 
@@ -163,7 +227,7 @@ In this type of modelling, first discussed by Kampmann \& Wagner (see \citet{Wag
 \label{continuity}
 \frac{\partial f}{\partial t} + \frac{\partial }{\partial R} (f \cdot v_R) = J_s \cdot \delta(R - \alpha R^*)
 \end{equation}
-where the precipitate growth rate $v_R = dR/dt$ is given by the 1st term on the right side of \eqref{P_radius}. The source term on the right side of \eqref{continuity} describes the generation of new nuclei with radius $\alpha R^*$ at a rate given by $J_s$ from eq. \eqref{P_density}.
+where the precipitate growth rate $v_R = dR/dt$ is given by \eqref{eq:growth}. The source term on the right side of \eqref{continuity} describes the generation of new nuclei with radius $\alpha R^*$ at a rate given by $J_s$ from eq. \eqref{eq:nucleation}.
 
 This PDE is solved numerically by discretizing the $(t,R)$ space and approximating the partial derivatives by finite differences. Defining the grid points $(t_i, R_k)$, where $(i,k)$ are integers, the discretized distribution is defined as
 \begin{equation}
@@ -194,10 +258,9 @@ N_i &= \int_0^\infty f(R,t_i) dR
 \bar{R}_i &= \frac{1}{N_i}\int_0^\infty f(R,t_i) R dR
 \approx \frac{1}{2 N_i}\sum_k { f_{i,k} (R_k^2-R_{k-1}^2 ) }  \\
 F_i &= \frac{4\pi}{3V_{at}} \int_0^\infty f(R,t_i) R^3 dR
-\approx \frac{1}{4} \sum_k { f_{i,k} (R_k^4-R_{k-1}^4 )  } 
+\approx \frac{1}{4\, r_{at}^3} \sum_k { f_{i,k} (R_k^4-R_{k-1}^4 )  } 
 	\end{align}
 \end{subequations}
-
 
 \subsection{Numerical integration}
 
