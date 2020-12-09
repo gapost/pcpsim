@@ -1,16 +1,16 @@
 function [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
+% [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
 %
 % Define the ODEs describing mean precipitate radius during nucleation and
 % growth 
 %
 % Input:
+%  t       : time (D*t/rat^2) 
 %  x(1,3)  : ODE variables, 
 %            x(1): precipitate atomic concentration, 
 %            x(2): mean radius (in units of rat), 
 %            x(3): atomic concentration of solute in matrix
-%  t       : time (D*t/rat^2) 
 %  Xp, Xeq : solute conc. in the precipitate and in the matrix at equilibrium
 %  R0,dG0,b0 : nucleation & growth physical parameters
 %  incub   : if 1 then incubation time is calculated
@@ -36,6 +36,8 @@ function [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
 
   S = Xp*log(X/Xeq) +(1-Xp).*log((1-X)/(1-Xeq));
   F = R^3 * N;
+  Xr = Xeq*exp(R0./R*(1-Xeq)/(Xp-Xeq));
+  Xr=min(0.9*Xp,Xr);
   
   if S>0, % nucleation & growth
     if R<0,
@@ -60,15 +62,13 @@ function [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
         y=xdot(1)/N;
       endif
     endif
-    Xr = Xeq*exp(R0./R/Xp);
-    Xr=min(0.9*Xp,Xr);
+    
     xdot(2) = (X-Xr) / (Xp-Xr) / R + y*(1.05*R0./S - R);
     if xdot(2)<0, xdot(2)=0; end
     xdot(3) = (X - Xp) * F / (1-F) * (3*xdot(2)/R + y );    
   else % dissolution
     if R>0, 
-      Xr = Xeq*exp(R0./R/Xp);
-      Xr=min(0.9*Xp,Xr);
+      
       xdot(2) = (X-Xr) / (Xp-Xr) / R;
       xdot(3) = (X - Xp) * F / (1-F) * 3 * xdot(2) / R;
     endif

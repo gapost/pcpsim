@@ -92,3 +92,5 @@ semilogx(t,xdot(:,1)*gam,'.-')
 xlabel('t (s) ');
 ylabel('Jn (s^{-1})');
 
+print2pdf(gcf,[20 24],'FeC_meanR_nucl')
+

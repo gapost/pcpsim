@@ -6,7 +6,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
     
-%\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[left=2.5cm,right=2.5cm,top=2cm,bottom=3cm]{geometry}
     
 \usepackage[round]{natbib}
 \usepackage{hyperref}
@@ -216,9 +216,19 @@ The content is listed below:
 
 \lstinputlisting{../mean_radius/mean_radius_ng.m}
 
+\pagebreak
+
 \subsection{Example calculation}
 
+An example calculation using the mean radius ODEs is in \texttt{mean\_radius/FeC\_meanR\_nucl.m}. The ODEs are integrated using the solver \texttt{ode23}.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=14cm]{../mean_radius/FeC_meanR_nucl.pdf} 
+\caption{Nucleation of Fe$_3$C carbide in a Fe - 0.07 at.\% C alloy at 487~K calculated with the mean radius ODEs. Model parameter: $\gamma = 0.174$~J/m$^2$. Compare to \citet{Perez-2003-ID509}}
+\end{figure}
+
+\pagebreak
 
 \section{Numerical evolution of the precipitate size distribution (PSD)}
 
