@@ -44,22 +44,28 @@ b0 = 4*pi*R0.^2*Z*(rat/afe)^4;
 nt = (log10(dt)+1)*10 + 1;
 t = logspace(-1,log10(dt),nt);
 
-ifunc = @(x,t) mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg);
+% clear figure
+figure 1
+clf
 
-lsode_options('initial step size',1e-3*gam);
+ifunc = @(t,x) mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg);
+
+odeopt = odeset('InitialStep', 0.001*gam,...
+  'AbsTol',[1e-32, 1e-6, 1e-6]',...
+  'NonNegative',[1 1 1]');
 
 tic
-x = lsode (ifunc, [0 1.05*R0/S0 X0], t*gam); 
-toc
+[dd,x] = ode23(ifunc,t*gam,[0 1.05*R0/S0 X0],odeopt);
+toc  
 
 F = x(:,2).^3.*x(:,1);
 S = Xp*log(x(:,3)./Xeq)+(1-Xp)*log((1-x(:,3))./(1-Xeq));
 xdot = zeros(size(x));
 for i=1:size(x,1)
-  xdot(i,:) = mean_radius_ng(x(i,:)',t(i)*gam,Xp,Xeq,b0,dG0,R0,incub,0);
+  xdot(i,:) = mean_radius_ng(t(i)*gam,x(i,:)',Xp,Xeq,b0,dG0,R0,incub,0);
 end
 
-figure 1
+
 subplot(3,2,1)
 loglog(t,x(:,2).*rat,'.-',t,R0./S*rat,'.-')
 ylabel('R (nm) ');

@@ -1,4 +1,4 @@
-function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
+function [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
 %
@@ -24,7 +24,7 @@ function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
   N = x(1); R = x(2); X = x(3);
-  if N<0,
+  if N<0, 
     error(['Negative N value, N=' num2str(N)]);
   endif
   if X<0,
@@ -32,6 +32,7 @@ function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
   endif
 
   xdot = zeros(size(x));
+  y=0;
 
   S = Xp*log(X/Xeq) +(1-Xp).*log((1-X)/(1-Xeq));
   F = R^3 * N;
@@ -42,7 +43,6 @@ function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
     endif
     S2 = S^2;
     b = X * b0 / S2;
-    y=0;
     xdot(1) = b .*exp(-dG0./S2);
     if incub,
       if t>0,
@@ -52,6 +52,8 @@ function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
         else
           y = 0;
         endif
+      else
+        xdot(1) = 0;
       end
     else
       if N>0,
@@ -73,6 +75,6 @@ function [xdot, F, S] = mean_radius_ng(x,t,Xp,Xeq,b0,dG0,R0,incub,dbg)
   endif
 
 
-  if dbg, disp(num2str([t x' xdot'])); end
+  if dbg, disp(num2str([t x' xdot' y])); end
 
 endfunction 

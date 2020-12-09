@@ -24,7 +24,7 @@ D =D0*exp(-Qd./(kb*Ta))*1e+18; %diffusion coefficient [nm^2/s]
 gam = D/rat^2;
 
 % alloy data
-gs = 0.062; %surface tension [J/m^2]
+gs = 0.055; %surface tension [J/m^2]
 X0 = 4.67e-4; % Nominal N concentration
 Xeq = 10.^(2.43 - 1840./Ta) *1e-2; % solubility
 Xp = 1/9; % precipitate
@@ -49,6 +49,9 @@ nt = length(t);
 
 sol = zeros(nTa,6);
 
+figure 1
+clf
+
 for i=1:nTa
   
   if i==1,
@@ -63,18 +66,20 @@ for i=1:nTa
       x = [0 1.05*R0(i)/S(i) X0]; 
     end
   end
-
-  ifunc = @(x,t) mean_radius_ng(x,t,Xp,Xeq(i),b0(i),dG0(i),R0(i),incub,dbg);
-
-  lsode_options('initial step size',1e-1*gam(i));
-  lsode_options('integration method','stiff');
-
+  
+  disp(Ta(i))
+  
+  odeopt = odeset('InitialStep', 0.1*gam(i),...
+    'AbsTol',[1e-32, 1e-6, 1e-6]',...
+    'NonNegative',[1 1 1]');
+  
+  ifunc = @(t,x) mean_radius_ng(t,x,Xp,Xeq(i),b0(i),dG0(i),R0(i),incub,dbg);
   tic
-  x = lsode (ifunc, x, t*gam(i)); 
+  [ttt,x] = ode23(ifunc,t*gam(i),x,odeopt);
   toc
-
   sol(i,1:3) = x(end,:);
-  sol(i,4:6) = ifunc(x(end,:)',t(end)*gam(i));
+  sol(i,4:6) = ifunc(t(end)*gam(i),x(end,:)');
+  
 end
 
 Nt = sol(:,1)';
@@ -91,9 +96,6 @@ i=find(S<0);
 Rc(i) = NaN;
 i=find(R<0);
 R(i) = NaN;
-
-figure 1
-clf
 
 subplot(2,2,1)
 semilogy(Ta,R*rat,'.-',Ta,Rc*rat,'.-')
