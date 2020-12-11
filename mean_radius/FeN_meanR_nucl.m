@@ -1,5 +1,6 @@
-% Calculate FeN nucleation & growth 373 K
-% by mean R equations
+% Calculate Fe - 880 ppm N nucleation & growth at 373 K
+% Exp: Abiko & Imai 1977
+% model by mean R equations
 clear
 
 % Constants
@@ -67,28 +68,29 @@ end
 
 
 subplot(3,2,1)
-loglog(t,x(:,2).*rat,'.-',t,R0./S*rat,'.-')
-ylabel('R (nm) ');
+loglog(t/60,x(:,2).*rat,'.-',t/60,R0./S*rat,'.-')
+ylabel('R, R^* (nm) ');
 
 subplot(3,2,2)
-semilogx(t,xdot(:,2)*gam*rat,'.-')
+semilogx(t/60,xdot(:,2)*gam*rat,'.-')
 ylabel('dR/dt (nm/s) ');
 
 subplot(3,2,3)
-loglog(t,x(:,3)/Xeq - 1,'.-')
-ylabel('X / X_e - 1 ');
+semilogx(t/60,x(:,3),'.-')
+ylabel('X');
 
 subplot(3,2,4)
-semilogx(t,F,'.-')
+semilogx(t/60,F,'.-')
 ylabel('Transformed volume fraction ');
 
 subplot(3,2,5)
-semilogx(t,x(:,1),'.-')
-xlabel('t (s) ');
+semilogx(t/60,x(:,1),'.-')
+xlabel('t (min) ');
 ylabel('Clusters per atom');
 
 subplot(3,2,6)
-semilogx(t,xdot(:,1)*gam,'.-')
-xlabel('t (s) ');
+semilogx(t/60,xdot(:,1)*gam,'.-')
+xlabel('t (min) ');
 ylabel('Jn (s^{-1})');
 
+print2pdf(gcf,[20 24],'FeN_meanR_nucl')
