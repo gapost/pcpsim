@@ -118,5 +118,6 @@ ylabel('Transformed volume fraction ');
 xlabel('Ta (K)');
 
 A = [Ta' X' F' Nt' Rc'*rat];
-save('-ascii',fname,'A'); 
+##save('-ascii',fname,'A'); 
 
+print2pdf(gcf,[20 20],'FeN_meanR_anneal')
