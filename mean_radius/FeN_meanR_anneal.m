@@ -4,8 +4,8 @@ clear
 % Model parameters/options
 fname = 'FeN56_8min_incub.dat';
 dt = 8*60; % annealing time in s
-gs = 0.056; %surface tension [J/m^2]
-incub=1; % Calculate incubation time for nucleation
+gs = 0.059; %surface tension [J/m^2]
+incub=0; % Calculate incubation time for nucleation
 dbg=0; % debug level 
 
 % Constants
@@ -61,11 +61,15 @@ for i=1:nTa
   else
     x = sol(i-1,1:3);
     
-    % check if R is below the new Rc
-    % if yes, delete all nuclei
+    % check the following:
+    %   1) we have nucleation (dN/dt>0) 
+    %   2) current R is below the new Rc   
+    % if yes, delete all nuclei (they are unstable)
     s = Xp*log(x(3)./Xeq(i))+(1-Xp)*log((1-x(3))./(1-Xeq(i)));
-    if x(2) < 1.05*R0(i)/s,
+    jn = x(3)*b0(i)/s^2*exp(-dG0(i)/s^2);
+    if x(2) < 1.05*R0(i)/s & jn>0,
       x = [0 1.05*R0(i)/S(i) X0]; 
+      % disp(['R, R*, S, Jn = ' num2str([x(2) 1.05*R0(i)/s s jn])])
     end
   end
   
@@ -120,4 +124,4 @@ xlabel('Ta (K)');
 A = [Ta' X' F' Nt' Rc'*rat];
 ##save('-ascii',fname,'A'); 
 
-print2pdf(gcf,[20 20],'FeN_meanR_anneal')
+##print2pdf(gcf,[20 20],'FeN_meanR_anneal')
