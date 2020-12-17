@@ -5,6 +5,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{placeins}
     
 \usepackage[left=2.5cm,right=2.5cm,top=2cm,bottom=3cm]{geometry}
     
@@ -246,25 +247,38 @@ The mean radius ODEs are not suitable for modelling dynamic/transient processes 
 
 For example, if some particles have nucleated at some temperature $T_1$ with radius $R\sim R_1^*$ and then we go to a higher temperature $T_2>T_1$ where $R<R_2^*$ then the particles are unstable and will dissolve. However, this cannot be properly described by the mean radius ODEs.
 
-Here we make the following approximation in order to model nitride nucleation/dissolution by the mean radius ODEs. If at some temperature the existing particles are below $R^*$, they are immediately ``dissolved'' and the nucleation process starts again from scratch. The results are shown below in comparison to experiment.The value of $\gamma$ can be adjusted so that the minimum coincides with the experimentally observed at 430~K. The optimum value is $\gamma=0.056$~J/m$^2$.
+Here we make the following approximation in order to model nitride nucleation/dissolution by the mean radius ODEs. If at some temperature during the nucleation phase the existing particles are below $R^*$, they are immediately ``dissolved'' and the nucleation process starts again from scratch. This is implemented as follows. Suppose that after some ageing at temperature $T$ we have a concentration $N$ of nuclei with mean radius $R$. The ageing is continued at a higher temperature $T'>T$. We decide if the nuclei will survive based  on the following steps:
+\begin{itemize}
+\item Calculate the critical radius $R^*$ at the new temperature
+\item Calculate the nucleation rate $J_n$ at the new temperature
+\item If $R<R^*$ and $J_n \neq 0$ set $R=R^*$ and $N=0$ (dissolve the nuclei)
+\end{itemize}
 
-\begin{figure}[h]
+This model is implemented in \texttt{mean\_radius/FeN\_meanR\_anneal.m} where a Fe - 0.047 at.\% N alloy is subjected to the annealing program used in irradiation 9: $280 < T < 600$~K, $\Delta T/T=0.04$, $\Delta t=8$~min.
+
+The results are shown below in comparison to experiment.The value of $\gamma$ is adjusted so that the minimum coincides with the experimentally observed at 430~K. The optimum value is $\gamma=0.057$~J/m$^2$.
+
+\begin{figure}[b]
 \centering
-\includegraphics[width=12cm]{../mean_radius/FeN_exp_vs_sim} 
+\includegraphics[width=14cm]{../mean_radius/FeN_exp_vs_sim} 
 \caption{\texttt{mean\_radius/FeN\_exp\_vs\_sim.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal (8 or 5 min) annealing. Our experimental resistivity data. Simulation with the mean radius ODEs with different values for $\gamma$. }
 \end{figure}
 
-The question arises whether it is correct to consider here an incubation period or not. The simulation can be done also without incubation and the minimum is obtained with slightly different $\gamma$ (0.059). However, the simulation result is much more sensitive then to the value of $\Delta t$ whereas in the experiment we had very similar results using 5 and 8 min anneals. 
-
-The simulation details of particle radius, density, volume fraction are shown in the following figure for $\gamma = 0.056$
-
 \pagebreak
+\FloatBarrier
+
+The question arises whether it is correct to consider here an incubation period or not. The simulation can be done also without incubation and the minimum is obtained with slightly different $\gamma$ (0.059~J/m$^2$). However, the simulation result is more sensitive then to the value of $\Delta t$ whereas in the experiment we had very similar results using 5 and 8 min anneals. Thus incubation time is computed and time starts from 0 at each temperature.
+
+The simulation details of particle radius, density, volume fraction as a function of temperature are shown in the following figure for $\gamma = 0.057$~J/m$^2$.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=14cm]{../mean_radius/FeN_meanR_anneal} 
-\caption{\texttt{mean\_radius/FeN\_meanR\_nucl.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal annealing. Simulation parameters: $\gamma = 0.056$~J/m$^2$, $\Delta t = 8$~min, incubation on. }
+\caption{\texttt{mean\_radius/FeN\_meanR\_nucl.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal annealing. Simulation parameters: $\gamma = 0.057$~J/m$^2$, $\Delta t = 8$~min, incubation on. }
 \end{figure}
+
+\pagebreak
+\FloatBarrier
 
 \section{Numerical evolution of the precipitate size distribution (PSD)}
 
