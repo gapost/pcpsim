@@ -39,7 +39,15 @@ function [xdot, F, S] = mean_radius_ng(t,x,Xp,Xeq,b0,dG0,R0,incub,dbg)
   
   % solute conc. at prec./matrix interface
   Xr = Xeq*exp(R0./R*(1-Xeq)/(Xp-Xeq));
-  Xr = min(0.9*Xp,Xr); % cannot go above Xp
+  
+  % precipite radius growth rate
+  if Xr<0.5*Xp,
+    Vr = (X-Xr) / (Xp-Xr) / R * (R>0);
+  else
+    Xr = 0.5*Xp;
+    Rp = R0*(1-Xeq)/(Xp-Xeq)/log(Xp/2/Xeq);
+    Vr = (X-Xr) / (Xp-Xr) / Rp * (R/Rp);
+  end
   
   if S>0, % nucleation 
     S2 = S^2;
