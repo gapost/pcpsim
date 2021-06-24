@@ -10,6 +10,11 @@ A = load('tetsu.csv');
 t_te = A(:,1);
 R_te = A(:,2);
 
+R77_fe = 0.612;
+semilogx(t_ab,R_ab-R77_fe,'o-',t_te,R_te-R77_fe,'^-')
+
+return
+
 A = load('tvsX.dat');
 t_sim = A(:,1);
 X_sim = A(:,2);
