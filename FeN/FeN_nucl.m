@@ -21,7 +21,7 @@ X0 = 8.8e-4; % Initial N concentration
 nt = (log10(dt)+1)*10 + 1;
 t = logspace(-1,log10(dt),nt);
 
-solver = 'daspk'; % 'ode15i', 'daspk' (octave only)
+solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
 [x,F] = FeN_model(t,Ta,X0,gam,incub,solver);
 
 clf
@@ -44,6 +44,6 @@ semilogx(t,F,'.-')
 title('Transformed volume fraction ');
 xlabel('t (s)');
 
-print -dpdfcrop FeN_nucl
+%print -dpdfcrop FeN_nucl
 
 

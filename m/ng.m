@@ -52,7 +52,7 @@ function [dNdt, dRdt] = ng(t,N,R,dNdt,X,Xp,Xeq,b0,dG0,R0,incub,dbg)
   % reduction of R due to new nuclei
   Rs = 1.05*R0/S;
   if N>1e-23 && R>Rs, % only if appreciable N > 1 per cm^3
-    dRdt -= dNdt/N*(R-Rs);
+    dRdt = dRdt - dNdt/N*(R-Rs);
   end
  
   % compute nucleation rate
@@ -63,7 +63,7 @@ function [dNdt, dRdt] = ng(t,N,R,dNdt,X,Xp,Xeq,b0,dG0,R0,incub,dbg)
     dNdt = b .*exp(-dG0./S2); % nucleation rate, no incubation
     if incub, % with incubation
       if t>0,
-        dNdt *= exp(-1/2/b/t);
+        dNdt = dNdt * exp(-1/2/b/t);
       else % for t=0, nucl rate = 0
         dNdt = 0;
       end

@@ -17,7 +17,7 @@ function [x,F,S] = ngdae(t,x0,Xp,Xeq,b0,dG0,R0,incub,solver,dbg)
   X0 = x0(3)*(1-F0) + Xp*F0;
   if F0==0 && X0==0,
     error(['No solutes in initial condition x0=' num2str(x0)]);
-  endif
+  end
 
   % calc initial xdot
   xdot0 = zeros(size(x0));  
@@ -55,12 +55,5 @@ function [x,F,S] = ngdae(t,x0,Xp,Xeq,b0,dG0,R0,incub,solver,dbg)
 end % ngdae
 
 
-function ret = daesystem(t,x,xdot,X0,Xp,Xeq,b0,dG0,R0,incub,dbg)
-  [dNdt, dRdt] = ng(t,x(1),x(2),xdot(1),x(3),Xp,Xeq,b0,dG0,R0,incub,dbg);
-  F = x(1)*x(2)^3;
-  ret = [xdot(1) - dNdt; 
-         xdot(2) - dRdt; 
-         X0 - x(3)*(1-F) - Xp*F];
-  if dbg, disp(num2str([t x' xdot' ret'],3)); end
-end
+
 

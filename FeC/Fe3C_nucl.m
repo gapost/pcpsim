@@ -41,9 +41,8 @@ S = Xp*log(X0/Xeq) +(1-Xp).*log((1-X0)/(1-Xeq));
 x0 = [0; 1.05*R0/S; X0];
 
 % call dae solver
-solver = 'daspk'; % 'ode15i', 'daspk' (octave only)
-[x,F,S] = ngdae(t/tau,x0,...
-  Xp,Xeq,b0,dG0,R0,incub,solver);
+solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
+[x,F,S] = ngdae(t/tau,x0,Xp,Xeq,b0,dG0,R0,incub,solver);
 
 clf
 subplot(2,2,1)
@@ -66,4 +65,4 @@ semilogx(t,F,'.-')
 title('Transformed volume fraction ');
 xlabel('t (s) ');
 
-print -dpdfcrop Fe3C_nucl
+%print -dpdfcrop Fe3C_nucl

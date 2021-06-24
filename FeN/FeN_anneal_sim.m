@@ -15,7 +15,7 @@ incub=0; % Calc. incubation time for nucleation
 X0 = 4.8e-4; % Initial N concentration, 
 
 % model calculation for 3 values of gamma (surface tension)
-solver = 'daspk'; % 'ode15i', 'daspk' (octave only)
+solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
 nTa = length(Ta);
 x = zeros(nTa,3,3);
 F = zeros(nTa,3);
@@ -52,5 +52,7 @@ text(257,-100,'Fe - 480 ppm N','fontsize',20)
 text(257,-120,'Isochronal, \Deltat=5 min','fontsize',14)
 text(257,-140,'\rho_N^p / \rho_N^m = 0.20','fontsize',14)
     
-print -dpdfcrop FeN_anneal_sim
+%print -dpdfcrop FeN_anneal_sim
 
+saveas(gca,'test.pdf');
+system('pdfcrop test.pdf test.pdf');
