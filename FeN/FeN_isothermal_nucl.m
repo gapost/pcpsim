@@ -44,6 +44,6 @@ semilogx(t,F,'.-')
 title('Transformed volume fraction ');
 xlabel('t (s)');
 
-%print -dpdfcrop FeN_nucl
+print -dpng FeN_isothermal_nucl
 
 

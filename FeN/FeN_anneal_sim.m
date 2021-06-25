@@ -52,7 +52,5 @@ text(257,-100,'Fe - 480 ppm N','fontsize',20)
 text(257,-120,'Isochronal, \Deltat=5 min','fontsize',14)
 text(257,-140,'\rho_N^p / \rho_N^m = 0.20','fontsize',14)
     
-%print -dpdfcrop FeN_anneal_sim
+print -dpng FeN_anneal_sim
 
-saveas(gca,'test.pdf');
-system('pdfcrop test.pdf test.pdf');

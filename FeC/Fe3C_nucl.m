@@ -65,4 +65,4 @@ semilogx(t,F,'.-')
 title('Transformed volume fraction ');
 xlabel('t (s) ');
 
-%print -dpdfcrop Fe3C_nucl
+print -dpng Fe3C_nucl
