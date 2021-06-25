@@ -2,18 +2,6 @@
 ## Matlab auto save
 *.asv
 
-## tex4ht
-*.4ct
-*.4tc
-*.css
-*.html
-*.idv
-*.lg
-*.tmp
-*.toc
-*.xref
-*.png
-
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
