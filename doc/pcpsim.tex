@@ -49,10 +49,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{textcomp}
-\author{
-  A. Theodorou\\
-  \texttt{theoda@ipta.demokritos.gr}
-}
+
 \author{
   A. Theodorou\\
   \texttt{theoda@ipta.demokritos.gr}
@@ -60,9 +57,10 @@
   G. Apostolopoulos\\
   \texttt{gapost@ipta.demokritos.gr}
 }
-\date{June 2020}
+
+\date{June 2021}
 \title{\texttt{pcpsim} \\ 
-MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
+Precipitation Kinetics Simulation in \texttt{MATLAB/OCTAVE}
 }
      
 \begin{document}
@@ -70,14 +68,16 @@ MODEL FOR HOMOGENEOUS PRECIPITATION KINETICS in \texttt{GNU OCTAVE}
 \maketitle
 
 \section{Introduction}
-The model for homogeneous isothermal precipitation is partly based on the model by Langer and Schwartz, as modified by Kampmann and Wagner (MLS model) and describes the nucleation and growth of  precipitates from a solid solution.
+\texttt{pcpsim} is a collection of \texttt{MATLAB/OCTAVE} scripts that can be used to simulate homogeneous precipitation of a 2nd phase in alloys. 
+
+The underlying model is that of \citet{Langer-1980-Kineticsofnucleati}, as modified by \citet{Kampmann-1984-KINETICSOFPRECIPIT} (MLS model) and describes the nucleation and growth of  precipitates from a supersaturated solid solution.
 
 
 \section{Theoretical background}
 
 \subsection{Nucleation}
 
-As a first step we need to define the driving force for precipitation at any given time of the aging process: 
+The driving force for precipitation is the free energy gain: 
 \begin{equation}
 \Delta g = - \frac{kT}{V_{at}} \cdot S 
 \end{equation}
@@ -85,16 +85,14 @@ with
 \begin{equation}
 S =  X_p \ln\frac{X}{X_{eq}} + (1 - X_p) \ln\frac{1 - X}{1-X_{eq}} 
 \end{equation}
-where $V_{at}$ is the atomic volume (considered as constant for all species, $V_{at}=a^3/2$ for a bcc structure with lattice parameter $a$), $S$ is a thermodynamical function giving the driving force for nucleation (based
-on the hypothesis of a diluted and regular solid solution), $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the solute mole fraction in the precipitate, and $X$ the current solute mole fraction of the matrix. The above relation has been derived by \citet{Aaronson-1970-Thevolumefreeener}.
+where $V_{at}$ is the atomic volume of the new phase, $S$ is a thermodynamical function derived by \citet{Aaronson-1970-Thevolumefreeener}, $X_{eq}$ is the equilibrium solute mole fraction in the matrix, $X_p$ the solute mole fraction in the precipitate, and $X$ the current solute mole fraction in the matrix. 
 
-The nucleation rate is:
+The nucleation rate is \citep{Kampmann-1984-KINETICSOFPRECIPIT}
 \begin{equation}
 \label{eq:nucleation}
-J_s = \frac{d N}{d t} = Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{t_i}{t})
+\frac{d N}{d t} = Z \beta^* \exp(-\frac{\Delta G^*}{kT}) \exp(-\frac{t_i}{t})
 \end{equation}
 where $N$ is the number of nuclei per atomic site, $Z$ is the Zeldovich factor ($\approx$ 1/20) and $t_i$ is the incubation time. The other parameters of equation are expressed as follows:
-
 \begin{subequations}
 	\begin{align}
 \beta^* &= \frac{4\pi R^{*2} D X}{a^4} \\
@@ -108,7 +106,7 @@ where $R^*$ and $\Delta G^*$ are the critical nucleation radius and free energy,
 
 \subsection{Growth}
 
-A precipitate with $R>R^*$ grows by incorporating solute atoms from the surrounding matrix. Thus there is a flow of solute atoms from the matrix towards the precipitate surface. It is assumed that a steady-state is reached where there is a constant gradient of the solute concentration around the precipitate $X(r)$ that supports the solute flow $J = -D\,dX/dr |_{r=R}$, where $D$ is the diffusion constant of solute atoms in the matrix.
+A spherical precipitate with $R>R^*$ grows by incorporating solute atoms from the surrounding matrix. Thus there is a flow of solute atoms from the supersaturated matrix towards the precipitate surface. It is assumed that a steady-state is reached where there is a constant gradient of the solute concentration around the precipitate $X(r)$ that supports the solute flow $J = -D\,dX/dr |_{r=R}$, where $D$ is the diffusion constant of solute atoms in the matrix.
 
 By solving the steady-state diffusion equation $\nabla^2 X(r)=0$ in the region around the precipitate the following equation is obtained
 \begin{equation}
@@ -139,41 +137,40 @@ Thus the time differential of $R$ is given by
 \frac{X_{eq}\, (1-X_{eq})}{(X_p - X_{eq} )^2}
 \end{equation}
 
-\section{Nucleation \& Growth equations for the mean precipitate radius}
+\section{MLS equation for the mean precipitate radius}
 
-In many cases we may ignore the precipitate size distribution and consider only the mean radius $\bar{R}$.
+In the general case there is a precipitate size distribution and one has to study its evolution. However, in the MLS model we consider only the mean radius $\bar{R}$. It has been shown that in many cases this is sufficient.
 
-In this approximation the mean radius grows according to \eqref{eq:growth} while new precipitates of radius $R^*$ nucleate at a rate given by \eqref{eq:nucleation}. Thus the mean radius evolves as 
+In this approximation $\bar{R}$ grows according to \eqref{eq:growth} while new precipitates of radius $R^*$ nucleate at a rate given by \eqref{eq:nucleation}. The combination of these 2 processes leads to the following equation 
 \begin{equation}
-\label{P_radius}
+\label{eq:mls}
 \frac{d\bar{R}}{dt} = \frac{D}{\bar{R}} \cdot \frac{X - X_R}{X_p - X_R} - \frac{1}{N}\frac{dN}{dt} \cdot (\bar{R} - \alpha R^*)
 \end{equation}
-where the 2nd term expresses the reduction rate of $\bar{R}$ due to the nucleation of new critical nuclei. $\alpha$ is a value just above 1 (e.g. 1.05) which results from the fact that new precipitates only grow if their size is slightly larger than the nucleation size.
+where the 2nd term expresses the reduction rate of $\bar{R}$ due to the nucleation of new critical nuclei. $\alpha$ is a value just above 1 (e.g. 1.05) which reflects the fact that new precipitates grow only if their size is slightly larger than the critical size.
 
 As precipitates grow they consume solute atoms and thus the matrix concentration $X$ will be reduced from the initial $X_0$. The solute balance can be expressed as:
 \begin{equation}
+\label{eq:balance}
 X_0 = X\,(1-F) + X_p\,F
 \end{equation}
-where $F=\frac{4}{3}\pi R^3 N$ is the precipitate volume fraction. The derivative of $X$ can be obtained from the last equation:
-\begin{equation}
-\frac{dX}{dt} = -(X_p - X)\, \frac{F}{1-F} \,
-\left[ 3\frac{\dot{R}}{R} + \frac{\dot{N}}{N} \right]
-\end{equation}  
+where $F=\frac{4}{3}\pi R^3 N$ is the precipitate volume fraction.
 
-\subsection{Dimensionless formulation}
-Now the following dimensionless variables are defined that are easier to use for programming:
+The equations \eqref{eq:nucleation}, \eqref{eq:mls} and \eqref{eq:balance} form a differential-algebraic (DAE) system which can be integrated numerically in \texttt{MATLAB/OCTAVE}. 
+
+\section{Dimensionless formulation}
+To facilitate coding we define the following dimensionless variables:
 \begin{subequations}
-	\label{dmls}
+	\label{eq:dmls}
 	\begin{align}
-t' &= \frac{D\cdot t}{r_{at}^2} \\
+t' &= t / \tau \\
 R' &= R / r_{at}
 	\end{align}
 \end{subequations}
-where $r_{at} = (3V_{at}/4\pi)^{1/3}$ is the atomic radius.
+where $r_{at} = (3V_{at}/4\pi)^{1/3}$ is the atomic radius and $\tau = r_{at}^2/D$ corresponds roughly to the time between atomic jumps.
 
-The equations (\ref{eq:nucleation}), (\ref{P_radius}) plus the differential of the solute balance constitute a system of ordinary differential equations (ODEs) for $N$, $R'$ and $X$, which is rewritten here in terms of dimensionless variables:
+The complete DAE system in terms of dimensionless variables becomes:
 \begin{subequations}
-\label{eq:ngode}
+\label{eq:ngdae}
 \begin{align}
 \frac{dN}{dt'} &= 
 \frac{\beta_0 X}{S^2} 
@@ -186,12 +183,12 @@ The equations (\ref{eq:nucleation}), (\ref{P_radius}) plus the differential of t
 + 
 \frac{1}{N}\frac{dN}{dt'}
 \left( \frac{\alpha R_0}{S} - R' \right) \\
-\frac{dX}{dt'} &= -(X_p - X)\, \frac{F}{1-F} \,
-\left[ 3\frac{\dot{R'}}{R'} + \frac{\dot{N}}{N} \right]
+X_0 &= X\,(1-F) + X_p\,F
 \end{align}
 \end{subequations}
-where the following definitions have been made
+where the following additional definitions were introduced
 \begin{subequations}
+\label{eq:ngparam}
 \begin{align}
 R_0 &= \frac{2\gamma V_{at}}{r_{at}kT} \\ 
 \beta_0 &= 4\pi R_0^2 Z r_{at}^4/ a^4 \\
@@ -199,7 +196,7 @@ R_0 &= \frac{2\gamma V_{at}}{r_{at}kT} \\
 \end{align}
 \end{subequations}
 
-Additionally the following hold
+Further, the following also hold
 \begin{subequations}
 \begin{align}
 X_R &= X_{eq} \exp 
@@ -210,205 +207,100 @@ F &= R'^3 N
 
 In the following we will omit the prime from $t'$ and $R'$.
 
-\subsection{Implementation in \texttt{OCTAVE}}
+\section{Implementation in \texttt{MATLAB/OCTAVE}}
 
-The function file \texttt{mean\_radius/mean\_radius\_ng.m} defines the ODE system of \eqref{eq:ngode} so that it can be used in \texttt{MATLAB/OCTAVE} ODE solvers. The solver that showed the best results is \texttt{ode23}.
+The implementation is done in the following scripts:
 
-The content is listed below: 
+\begin{description}
+\item[\texttt{m/ng.m}] This function implements the nucleation and growth equations, i.e., the first two of \eqref{eq:ngdae}
 
-\lstinputlisting{../mean_radius/mean_radius_ng.m}
+\item[\texttt{m/ngdae.m}] This is a driver function for the solution of the DAE system. The user chooses the solver, either \texttt{ode15i} or  \texttt{daspk}. 
+
+\item[\texttt{m/ngparam.m}] This utility function calculates all parameters of the dimensionless formulation, equations \eqref{eq:ngparam} and \eqref{eq:dmls}, given the physical model parameters in SI units.
+
+\end{description}
+
+Details on the use of these functions can be found in the included examples, in the project sub-folders \texttt{FeC} and \texttt{FeN}. 
 
 \pagebreak
 
-\subsection{Example calculations}
+\section{Example calculations}
 
-\subsubsection{Nucleation of Fe$_3$C carbide}
+\subsection{Nucleation of Fe$_3$C carbide}
+
+In this example we repeat a calculation reported by \citet{Perez-2003-ID509} to validate our programs.
+
+All model parameters are taken from this publication. The results are very similar.
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=14cm]{../mean_radius/FeC_meanR_nucl.pdf} 
-\caption{\texttt{mean\_radius/FeC\_meanR\_nucl.m} Nucleation of Fe$_3$C carbide in a Fe - 0.07 at.\% C alloy at 487~K calculated with the mean radius ODEs. Model parameter: $\gamma = 0.174$~J/m$^2$. Compare to \citet{Perez-2003-ID509}}
+\centering 
+\includegraphics[width=\textwidth]{../FeC/Fe3C_nucl.png} 
+\caption{\texttt{FeC/Fe3C\_nucl.m} Nucleation of Fe$_3$C carbide in a Fe - 0.07 at.\% C alloy at 487~K. Model parameter: $\gamma = 0.174$~J/m$^2$. Compare to \citet{Perez-2003-ID509}}
 \end{figure}
 
 \pagebreak
 
-\subsubsection{Nucleation of $\alpha ''$ nitride at 373 K}
+\subsection{Nucleation of $\alpha ''$ nitride at 373 K}
+
+This calculation is very similar to the previous example and aims to simulate the precipitation of $\alpha ''$-Fe$_16$N$_2$ metastable nitride  in a Fe-N solid solution. This phase forms during low temperature ageing of Fe-N alloys (room temperature to 150$^\circ$C) and dissolves at about 250$^\circ$C \citep{Jack-1994-ID1207}.
+
+For the diffusion of interstitial N in Fe we used the following parametrization from (A.D. Le Claire, Landolt-B{\"o}rnstein, 1990)
+\begin{equation}
+D(\text{m}^2/\text{s}) = 1.26\times 10^{-7}
+\exp\left( -0.76\text{ eV}/k_B T \right) 
+\end{equation}
+and for the N concentration in the Fe matrix, in equilibrium with the $\alpha ''$ we consider
+\begin{equation}
+X_{eq} = 2.69
+\exp\left( -0.37\text{ eV}/k_B T \right) 
+\end{equation}
+as reported in \citet{Wriedt-1987-ID1192}. 
+
+For the surface energy we assume the value $\gamma = 0.06$~J/m$^2$ in order to obtain nucleation times similar to those observed in the experiments of \citet{Abiko-1977-ID656}.
+
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=14cm]{../mean_radius/FeN_meanR_nucl.pdf} 
-\caption{\texttt{mean\_radius/FeC\_meanR\_nucl.m} Nucleation of $\alpha ''$ nitride in a Fe - 0.088 at.\% N alloy at 373~K calculated with the mean radius ODEs. Model parameter: $\gamma = 0.062$~J/m$^2$. Compare to Abiko \& Ymai 1977}
+\includegraphics[width=\textwidth]{../FeN/FeN_isothermal_nucl.png} 
+\caption{\texttt{FeN/FeN\_isothermal\_nucl.m} Nucleation of $\alpha ''$ nitride in a 
+Fe - 0.088 at.\% N alloy at 373~K. 
+Model parameter: $\gamma = 0.06$~J/m$^2$.
+}
 \end{figure}
 
 \pagebreak
 
-\subsubsection{Nucleation/Dissolution of $\alpha ''$ nitride during isochronal annealing}
+\subsection{Nucleation/Dissolution of $\alpha ''$ nitride during isochronal annealing}
 
-The mean radius ODEs are not suitable for modelling dynamic/transient processes like isochronal annealing. 
+The MLS model is actually not well suited for dynamic/transient processes like isochronal annealing where we have frequent temperature changes. 
+For example, suppose some particles have nucleated at a temperature $T_1$ with radius $R\sim R_1^*$ in the course of an isochronal annealing process. When the system is brought to a higher temperature $T_2>T_1$, where $R<R_2^*$, then the particles are unstable and will dissolve. However, this cannot be properly described by the MLS equations.
 
-For example, if some particles have nucleated at some temperature $T_1$ with radius $R\sim R_1^*$ and then we go to a higher temperature $T_2>T_1$ where $R<R_2^*$ then the particles are unstable and will dissolve. However, this cannot be properly described by the mean radius ODEs.
-
-Here we make the following approximation in order to model nitride nucleation/dissolution by the mean radius ODEs. If at some temperature during the nucleation phase the existing particles are below $R^*$, they are immediately ``dissolved'' and the nucleation process starts again from scratch. This is implemented as follows. Suppose that after some ageing at temperature $T$ we have a concentration $N$ of nuclei with mean radius $R$. The ageing is continued at a higher temperature $T'>T$. We decide if the nuclei will survive based  on the following steps:
+Nevertheless, here we make the following approximation in order to simulate nitride nucleation/dissolution by means of the MLS model. If at some temperature during the nucleation phase the existing particles are below $R^*$, they are immediately ``dissolved'' and the nucleation process starts again from scratch. This is implemented as follows. Suppose that after some ageing process we have a concentration $N$ of nuclei with mean radius $R$. The ageing will continue at a temperature $T$. We decide if the nuclei will survive based  on the following steps:
 \begin{itemize}
 \item Calculate the critical radius $R^*$ at the new temperature
 \item Calculate the nucleation rate $J_n$ at the new temperature
-\item If $R<R^*$ and $J_n \neq 0$ set $R=R^*$ and $N=0$ (dissolve the nuclei)
+\item If $R<R^*$ and $J_n \neq 0$ set $N=0$, $X=X_0$ and $R=R^*$ (dissolve the nuclei)
 \end{itemize}
 
-This model is implemented in \texttt{mean\_radius/FeN\_meanR\_anneal.m} where a Fe - 0.047 at.\% N alloy is subjected to the annealing program used in irradiation 9: $280 < T < 600$~K, $\Delta T/T=0.04$, $\Delta t=8$~min.
+This model is implemented in \texttt{FeN/FeN\_isochronal\_nucl.m} where a Fe - 0.047 at.\% N alloy is subjected to the following annealing program: $280 < T < 600$~K, $\Delta T=10$~K, $\Delta t=5$~min. During the process we observe the nucleation of $\alpha''$ at about 350~K and its subsequent dissolution above 450~K. Model parameters ($D$, $X_{eq}$, $\gamma$) are the same as in the preceding section.
 
-The results are shown below in comparison to experiment.The value of $\gamma$ is adjusted so that the minimum coincides with the experimentally observed at 430~K. The optimum value is $\gamma=0.057$~J/m$^2$.
+The simulation results for particle radius, density, volume fraction as a function of temperature are shown in the following figure. 
 
 \begin{figure}[b]
 \centering
-\includegraphics[width=14cm]{../mean_radius/FeN_exp_vs_sim} 
-\caption{\texttt{mean\_radius/FeN\_exp\_vs\_sim.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal (8 or 5 min) annealing. Our experimental resistivity data. Simulation with the mean radius ODEs with different values for $\gamma$. }
+\includegraphics[width=\textwidth]{../FeN/FeN_isochronal_nucl.png} 
+\caption{\texttt{FeN/FeN\_isochronal\_nucl.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal annealing. Model parameter: $\gamma = 0.06$~J/m$^2$. }
 \end{figure}
 
 \pagebreak
 \FloatBarrier
 
-The question arises whether it is correct to consider here an incubation period or not. The simulation can be done also without incubation and the minimum is obtained with slightly different $\gamma$ (0.059~J/m$^2$). However, the simulation result is more sensitive then to the value of $\Delta t$ whereas in the experiment we had very similar results using 5 and 8 min anneals. Thus incubation time is computed and time starts from 0 at each temperature.
 
-The simulation details of particle radius, density, volume fraction as a function of temperature are shown in the following figure for $\gamma = 0.057$~J/m$^2$.
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=14cm]{../mean_radius/FeN_meanR_anneal} 
-\caption{\texttt{mean\_radius/FeN\_meanR\_nucl.m} Nucleation and dissolution of $\alpha ''$ nitride in a Fe - 0.047 at.\% N alloy during isochronal annealing. Simulation parameters: $\gamma = 0.057$~J/m$^2$, $\Delta t = 8$~min, incubation on. }
-\end{figure}
-
-\pagebreak
-\FloatBarrier
-
-\section{Numerical evolution of the precipitate size distribution (PSD)}
-
-In this type of modelling, first discussed by Kampmann \& Wagner (see \citet{Wagner-2005-HomogeneousSecond-P}, the ``N-modell'',) we consider the evolution of the precipitate distribution function with respect to radius, $f(R,t)$. The PSD satisfies the equation of continuity:
-\begin{equation}
-\label{continuity}
-\frac{\partial f}{\partial t} + \frac{\partial }{\partial R} (f \cdot v_R) = J_s \cdot \delta(R - \alpha R^*)
-\end{equation}
-where the precipitate growth rate $v_R = dR/dt$ is given by \eqref{eq:growth}. The source term on the right side of \eqref{continuity} describes the generation of new nuclei with radius $\alpha R^*$ at a rate given by $J_s$ from eq. \eqref{eq:nucleation}.
-
-This PDE is solved numerically by discretizing the $(t,R)$ space and approximating the partial derivatives by finite differences. Defining the grid points $(t_i, R_k)$, where $(i,k)$ are integers, the discretized distribution is defined as
-\begin{equation}
-f_{ik} = \frac{1}{\Delta R_k} \int_{R_{k-1}}^{R_k}f(R,t_i)\,dR
-\end{equation}
-and the discretized PDE becomes
-\begin{equation}
-\label{PDE}
-\frac{f_{i+1,k} - f_{ik}}{\Delta t_i} = - \frac{J_{ik} - J_{i,k-1}}{\Delta R_k} + \frac{J_s}{\Delta R_{k^*+1}} \delta_{k,k^*+1}
-\end{equation}
-where the precipitate ``current'' $J_{ik}$ is given by
-\begin{equation} 
-J_{ik} = 
-\begin{cases}
-f_{ik}v_k & v_k \geq 0 \\
-f_{i,k+1}v_k & v_k<0
-\end{cases}
-\end{equation}
-The above finite difference scheme has been introduced by \citet{Myhr-2000-Modellingofnon-iso} for this type of calculation and corresponds to ``\textit{upwind differencing}'' used in CFD (see Press et al. ``Numerical Recipes'', ch. 20).
-
-The index $k^*$ corresponds to the spatial grid point where $R_{k^*-1} \leq  R^* < R_{k^*}$. The generated nuclei are added to $f_{i,k^*+1}$ so that all of them survive and grow. \footnote{If the generated nuclei where added to $f_{i,k^*}$ a fraction of them would dissolve since $v_{k^*-1}<0.$ }
-
-The total precipitate concentration, average radius and volume fraction can be obtained from $f_{i,k}$ by the following relations:
-\begin{subequations}
-	\begin{align}
-N_i &= \int_0^\infty f(R,t_i) dR 
-\approx \sum_k { f_{i,k} \Delta R_k } \\
-\bar{R}_i &= \frac{1}{N_i}\int_0^\infty f(R,t_i) R dR
-\approx \frac{1}{2 N_i}\sum_k { f_{i,k} (R_k^2-R_{k-1}^2 ) }  \\
-F_i &= \frac{4\pi}{3V_{at}} \int_0^\infty f(R,t_i) R^3 dR
-\approx \frac{1}{4\, r_{at}^3} \sum_k { f_{i,k} (R_k^4-R_{k-1}^4 )  } 
-	\end{align}
-\end{subequations}
-
-\subsection{Numerical integration}
-
-A static logarithmic grid is selected for the $R$-space discretization with constant $\Delta R_k / R_k$ (typically $\sim 0.05$.) The first point is typically positioned just below $R^*$ and the last point should be higher than the largest anticipated radius $R_{\max}$ for the simulation period. To obtain an estimate of $R_{\max}$ we define the function $\tau(R)$
-\[
-\tau(R) = \int_{R^*}^{R}{\frac{dR}{v_R}}
-\] 
-where the initial solute concentration $X_0$ is employed in the evaluation of $v_R$. This function corresponds to the time needed for a precipitate to grow to radius $R$. Then $R_{\max}$ is found by solving numerically the equation $\tau(R_{\max}) = t_s$, where $t_s$ the total simulation time.
-
-The PSD is initialized either to zero or to some initial precipitation state obtained either from experiment or other simulation.
-
-The evolution of the PSD is done iteratively with the following steps:
-\begin{enumerate}
-\item Calculate the current volume fraction $F_i$ and matrix concentration $X$
-\item Calculate the nucleation rate $J_s$ and the bin index $k^*$ where the generated nuclei are to be inserted.
-\item Calculate the right side of eq. \eqref{PDE}.
-\item Adaptively decide the time step $\Delta t_i$ (see below)
-\item Advance the PSD to $f_{i+1,k}$ and simulation time
-\item Repeat until the total simulation time is reached 
-\end{enumerate}
-
-\subsubsection{Adaptive time step selection}
-$\Delta t_i$ is selected according to 2 criteria.
-
-First, an upper limit is set by the following relation
-\begin{equation}
-v_k  \Delta t_i < \Delta R_k, \quad \forall k
-\end{equation}
-This is the well-known \textit{Courant condition} which ensures the stability of the PDE numerical solution (again see Press et al. ``Numerical Recipes'', ch. 20). Essentially it means that in one time-step nuclei from one distribution bin can move only to adjacent bins and not further away. Thus the time interval is initially set by
-\begin{equation}
-\Delta t_i = \min \left\lbrace  | \Delta R_k / v_k | \right\rbrace 
-\end{equation}
-
-A second criterion is set by the requirement that $R^*$, which is a critical simulation parameter, does not change appreciably during a time step. Typically we require that $\Delta R^* / R^* < 0.01$. To implement this, $f_{i+1,k}$ and the new $R^*$ must first be calculated with the current value of $\Delta t_i$; if the change of $R^*$ is too large the time step is halved and $f_{i+1,k}$ is recalculated. The process is repeated until the criterion is fulfilled. 
-
-\subsubsection{Lower cut-off radius} 
-
-A drawback of the method is that the time step is bounded by the smallest $\Delta R_k / v_k$ which occurs at the lower $R$ bins. However, as the simulation advances and the average radius becomes larger, the concentration in the first few bins becomes very low and can be neglected. Thus we define a lower cut-off index $k_c$ and set $f=0$ for $R<R_{k_c}$. The grid points below $k_c$ are not considered when selecting  $\Delta t_i$ and this allows for much more efficient simulation in the growth phase. 
-
-The cut-off index $k_c$ is initially set to the 1st grid point and then it is advanced by one each time the concentration in the 1st bin above cut-off, $f_{i,k_c+1}\cdot \Delta R_{k_c+1}$, falls below a certain threshold $N_{min}$. A reasonable threshold could be 1 nucleus per cm$^3$ or, equivalently, $N_{min}\sim 10^{-23}$. This means that effectively when the concentration in the first bin above $k_c$ falls below $N_{min}$, the bin is zeroed-out and becomes inactive. 
-
-When nuclei dissolution occurs the distribution will move gradually towards smaller $R$ and we have to allow $k_c$ to go down again, i.e., to gradually reactivate the lower bins of the distribution. For this we check the concentration $\delta N_c$ of nuclei that would move from bin $k_c+1$ towards $k_c$ during a time-step. This is equal to 
-\[
-\delta N_c = |v_{k_c}| f_{i,k_c+1} \Delta t_i
-\] 
-If $\delta N_c$ becomes larger than a threshold then the cut-off index $k_c$ is decreased by one. This threshold is selected as
-\begin{equation}
-\delta N_c \geq N_{min} + \epsilon N
-\end{equation}
-where $N = \sum_k {f_{i,k} \Delta R_k}$ is the total concentration of nuclei and $\epsilon$ a small number (typically $10^{-3}$ or $10^{-4}$). Here the relative term $\epsilon N$ is used to raise the threshold, otherwise the lower cut-off will extend to very small $R$ and the simulation will become significantly slower. 
-
-\section{Vacancy - Nitrogen complexes}
-
-The calculations for the binding energy were performed within density function theory (DFT). The total binding energy for various $V_nN_m$, is defined as the energy difference between the initial configuration where all the constituents of a complex are infinitely separated from each other and the final configuration where they form the complex.
-\begin{equation}
-	E^b (V_nN_m) = nE(V) + mE(N) - E(V_nN_m) - (n+m-1)E(Fe)
-\end{equation}
-where $E(V)$ and $E(N)$ are the total energies of Fe cell with the same atomic sites containing, respectively, a vacancy) and an octahedral carbon, whereas $E(V_nN_m)$ represents the total energy of the same cell with a $V_nN_m$ complex in bcc-Fe. $E(Fe)$ is the total energy of the corresponding bcc-Fe cell without defects.
-
-The evolution equation for the Nitrogen concentration when it creates a cluster with one type of traps is:
-\begin{equation}
-	\frac{dC_N}{dt} = -K_1 C_N C_T + K_2 C_{NT} 
-\end{equation}
-
-where $K_1$ and $K_2$ are the absorption and dissociation rates, $C_N$, $C_T$ and $C_{NT}$ are the concentration of nitrogen, traps and nitrogen-traps clusters. The absorption rate is defined by:
-\begin{equation}
-	k_1 = 4\pi Z r_c D
-\end{equation}
-where $Z$(=1.2) is a bias factor which accounts for elastic effects, $D$ is the diffusion coefficient of nitrogen and $r_\nu$ is the effective radius of cluster and it is deduced from the atomic volume $V_{at}$:
-\begin{equation}
-	\frac{4}{3}\pi r^3_c = (n+m) V_{at}.
-\end{equation}
-
-The emission rates are built to ensure that at equilibrium, a stationary state should be reached, which means that the capture and the emission should strictly compensate. This leads to
-\begin{equation}
-	k_2 = \frac{k_1}{V_{at}}exp(-\frac{E^b}{kT_a})
-\end{equation}
-
-Using the equation \ref{dmls}, the dimensionless equation for the nitrogen concentration is
-\begin{equation}
-	\frac{dN}{dt'} = - k_1 \cdot N \cdot C_T + k_1 \cdot exp(-\frac{E^b}{kT_a}) C_{NT}, k_1 = Z\cdot r_c = Z \sqrt{3} \cdot r_{at},
-\end{equation} 
-
-In case the trap is a cluster of 2 vacancies the binding energy is $E^b$ = 0.49.
  
 \bibliographystyle{plainnat}
 \bibliography{pcpsim}
+%\bibliography{/home/george/Work/Sci/Pubs/bib/export.bib}
 
 \end{document}
  
