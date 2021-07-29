@@ -5,9 +5,9 @@
 clear
 
 % experimental annealing conditions
-Ta = [256 266 276	285	295	305	314	325	335	344	354	364	375	...
-      385	395	406	416	432	446	460	474	488	504	518 532 548 ...
-      564 570 586 602 616 632 650 700];
+Ta  = [251.2 261.6 272.4 283.8 295.5 307.8 320.6 333.9 347.7 ...
+       362.1 377.1 392.8 409.1 426.0 443.6 462.1 481.2 501.2 ...
+       522.0 543.6 566.1 589.6 614.1 639.5 666.1 693.7];
 dt = 8*60; % ageing time in s
 
 % alloy data
@@ -31,7 +31,7 @@ rhoNm = 0.6; % nOhm-cm / ppm of [N], Wagenblast 1968
 rhoNp = rhoNm*0.20; % validated from annealing exprmnts
 rhoD = 1.5; % V & SIA resistivity
 rhoVN = 1.5; % Adjusted to fit experiment
-rhoVN2 = 0.2; % Adjusted to fit experiment 
+rhoVN2 = 0.3; % Adjusted to fit experiment 
 
 rho = zeros(length(Ta),4);
 
@@ -45,8 +45,8 @@ for i=1:4,
   
   [x,F,R] = FeNirrad_model(dt,Ta,X0-XVN0(i),XVN0(i),gam,incub,Eb);
 
-  rho(:,i) = (x(:,3:7)*[rhoNm rhoD rhoVN rhoVN2 rhoD*4]').*(1-F) + ...
-    rhoNp*Xp*F - rhoNm*X0;
+  rho(:,i) = ((x(:,3:7)*[rhoNm rhoD rhoVN rhoVN2 rhoD*4]').*(1-F) + ...
+    rhoNp*Xp*F - rhoNm*X0)*1e6;
   
   subplot(2,2,i)
   semilogy(Ta,[x(:,[3 5]).*(1-F) 2*x(:,6).*(1-F)  Xp*F])
@@ -60,11 +60,9 @@ for i=1:4,
   
 end
 
-rho = 1e6*rho;
-
 figure 2
 clf 
-plot(Ta,rho,'o-');
+plot(Ta,rho,'o-')
 hold on
 plot([250 650], [0 0],'--k')
 hold off
