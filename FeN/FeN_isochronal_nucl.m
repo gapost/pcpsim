@@ -16,8 +16,7 @@ X0 = 4.8e-4; % Initial N concentration,
 gam = 0.058; % Surface tension [J/m^2]
 
 % model calculation for 3 values of gamma (surface tension)
-solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
-[x,F] = FeN_model(dt,Ta,X0,gam,incub,solver);
+[x,F] = FeN_model(dt,Ta,X0,gam,incub);
 
 clf
 
@@ -40,4 +39,4 @@ plot(Ta,F,'.-')
 title('Transformed volume fraction ');
 xlabel('Annealing T (K)');
     
-print -dpng FeN_isochronal_nucl
+% print -dpng FeN_isochronal_nucl

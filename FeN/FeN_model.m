@@ -1,4 +1,4 @@
-function [x,F] = FeN_model(t,Ta,X0,gam,incub,solver)
+function [x,F] = FeN_model(t,Ta,X0,gam,incub)
   
 % add path to pcpsim functions
 addpath("../m");
@@ -32,7 +32,7 @@ if nTa==1, % isothermal
 
     % call dae solver
     x = ngdae(t/tau,x0,...
-      Xp,Xeq,b0,dG0,R0,incub,solver);
+      Xp,Xeq,b0,dG0,R0,incub);
 
 else % nTa>1 -> isochronal
   if nt>1 && nt~=nTa,
@@ -64,8 +64,8 @@ else % nTa>1 -> isochronal
         end
       end
 
-        y = ngdae(linspace(0,t(i)/tau(i),21),y,...
-           Xp,Xeq(i),b0(i),dG0(i),R0(i),incub,solver);
+      y = ngdae(linspace(0,t(i)/tau(i),21),y,...
+        Xp,Xeq(i),b0(i),dG0(i),R0(i),incub);
       
       x(i,:) = y(end,:);
       

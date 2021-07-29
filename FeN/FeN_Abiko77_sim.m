@@ -28,12 +28,11 @@ nt = (log10(dt)-1)*10 + 1;
 t = logspace(1,log10(dt),nt);
 
 % model calculation for 3 values of gamma (surface tension)
-solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
 x = zeros(nt,3,3);
 F = zeros(nt,3);
-[x(:,:,1),F(:,1)] = FeN_model(t,Ta,X0,0.058,incub,solver);
-[x(:,:,2),F(:,2)] = FeN_model(t,Ta,X0,0.060,incub,solver);
-[x(:,:,3),F(:,3)] = FeN_model(t,Ta,X0,0.062,incub,solver);
+[x(:,:,1),F(:,1)] = FeN_model(t,Ta,X0,0.058,incub);
+[x(:,:,2),F(:,2)] = FeN_model(t,Ta,X0,0.060,incub);
+[x(:,:,3),F(:,3)] = FeN_model(t,Ta,X0,0.062,incub);
 
 % model resistivity calculation
 Xp = 1/9;
@@ -66,4 +65,4 @@ text(0.15,-200,'Fe - 880 ppm N','fontsize',20)
 text(0.15,-240,'Isothermal, T=373 K','fontsize',14)
 text(0.15,-280,'\rho_N^p / \rho_N^m = 0.24','fontsize',14)
 
-print -dpng FeN_Abiko77_sim
+% print -dpng FeN_Abiko77_sim

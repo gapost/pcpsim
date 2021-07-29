@@ -19,9 +19,9 @@ solver = 'ode15i'; % 'ode15i', 'daspk' (octave only)
 nTa = length(Ta);
 x = zeros(nTa,3,3);
 F = zeros(nTa,3);
-[x(:,:,1),F(:,1)] = FeN_model(dt,Ta,X0,0.056,incub,solver);
-[x(:,:,2),F(:,2)] = FeN_model(dt,Ta,X0,0.058,incub,solver);
-[x(:,:,3),F(:,3)] = FeN_model(dt,Ta,X0,0.060,incub,solver);
+[x(:,:,1),F(:,1)] = FeN_model(dt,Ta,X0,0.056,incub);
+[x(:,:,2),F(:,2)] = FeN_model(dt,Ta,X0,0.058,incub);
+[x(:,:,3),F(:,3)] = FeN_model(dt,Ta,X0,0.060,incub);
 
 % model resistivity calculation
 Xp = 1/9;
@@ -52,5 +52,5 @@ text(257,-100,'Fe - 480 ppm N','fontsize',20)
 text(257,-120,'Isochronal, \Deltat=5 min','fontsize',14)
 text(257,-140,'\rho_N^p / \rho_N^m = 0.20','fontsize',14)
     
-print -dpng FeN_anneal_sim
+% print -dpng FeN_anneal_sim
 
